@@ -2618,11 +2618,8 @@ def get_57_website():
 
 def get_58_website():
     """MCINTYRE: https://www.mcintyreskiarea.com/mountain-report/"""
-    
-    # Set up Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run browser in headless mode
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    driver = headless_browser()
 
     try:
         # Load the page
@@ -2656,24 +2653,12 @@ def get_58_website():
 def get_59_website():
     """TENNEY MOUNTAIN: https://skitenney.com/report/"""
 
-    url = "https://skitenney.com/snow-report/"
+    url = "https://skitenney.propapps.io/snow-report/"
 
     browser = headless_browser()
 
     browser.get(url)
-    time.sleep(15)
-
-    # -----------------------------
-    # Find iframe where report lives
-    # -----------------------------
-    try:
-        iframe = browser.find_element(By.CSS_SELECTOR, "iframe#iframeResizer0, iframe#iFrameResizer0")
-        browser.switch_to.frame(iframe)
-        time.sleep(1)
-    except Exception:
-        print("❌ Cannot find iframe")
-        browser.quit()
-        return {"TENNEY MOUNTAIN": {"trails": 0, "lifts": 0, "new snow": 0}}
+    time.sleep(10)
 
     # Parse HTML inside iframe
     html = browser.page_source
@@ -3285,14 +3270,14 @@ def get_final_json_data():
 #         data = { 'BIG MOOSE MOUNTAIN' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_56_website()
-        print('56 website is done scraping' )
-    except:
-        data = { 'SKI BRADFORD' : empty_data_dict }
-        None
-    final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_56_website()
+#         print('56 website is done scraping' )
+#     except:
+#         data = { 'SKI BRADFORD' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_57_website()
@@ -3310,13 +3295,13 @@ def get_final_json_data():
 #         None
 #     final_json.append(data)
 # #-----------------------------------
-#     try:
-#         data = get_59_website()
-#         print('59 website is done scraping' )
-#     except:
-#         data = { 'TENNEY MOUNTAIN' : empty_data_dict }
-#         None
-#     final_json.append(data)
+    try:
+        data = get_59_website()
+        print('59 website is done scraping' )
+    except:
+        data = { 'TENNEY MOUNTAIN' : empty_data_dict }
+        None
+    final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_60_website()
