@@ -2765,57 +2765,65 @@ def get_60_website():
     return data_dict
 
 def get_61_website():
-    """SASKADENA SIX: https://www.saskadenasix.com/the-mountain/conditions"""
+    """SASKADENA SIX: Extract number of open lifts and trails."""
+    import requests
+    from bs4 import BeautifulSoup
 
-    driver = headless_browser()
+    url = "https://www.saskadenasix.com/the-mountain/conditions"
+    r = requests.get(url, timeout=15)
+    soup = BeautifulSoup(r.text, "lxml")
 
-    try:
-        # Load the page
-        url = "https://www.saskadenasix.com/the-mountain/conditions"
-        driver.get(url)
-        time.sleep(5)  # Wait for content to load
+    # -----------------------------
+    # FIND LIFTS & TRAILS SECTIONS
+    # -----------------------------
+    lifts_open = 0
+    trails_open = 0
 
-        # Find all measurement items
-        measurement_items = driver.find_elements(By.CSS_SELECTOR, "div.styles__StyledDorMeasurementItem-sc-efp7vw-0")
+    # Find the entire content container
+    container = soup.select_one("div.listing-row.lifts-trails")
+    if not container:
+        return {"SASKADENA SIX": {"lifts": 0, "trails": 0}}
 
-        # Initialize variables
-        num_trails = 0
-        num_lifts = 0
+    elements = container.find_all(["h2", "article"])
 
-        # Loop through the measurement items and find the correct labels
-        num_lifts = measurement_items[2].find_element(By.CLASS_NAME, "percent-primary-text").text.strip()
-        num_trails = measurement_items[3].find_element(By.CLASS_NAME, "percent-primary-text").text.strip()
+    section = None  # "lifts" or "trails"
 
-        # Extract Base Depth and New Snow (48 Hour) from the <ul>
-        base_depth, new_snow = 0, 0
-        report_items = driver.find_elements(By.CSS_SELECTOR, "ul.styles__ReportDataItems-sc-1kqptpn-8 li")
-        for item in report_items:
-            header = item.find_element(By.CLASS_NAME, "styles__ItemHeader-sc-1kqptpn-10").text.strip()
-            value = item.find_element(By.CLASS_NAME, "styles__ItemValue-sc-1kqptpn-12").text.strip()
+    for el in elements:
 
-            if header == "Base-Depth":
-                base_depth = int(value.replace('"', "").strip())  # Remove double quotes
-            elif header == "48 Hour":
-                new_snow = int(value.replace('"', "").strip())  # Remove double quotes
+        # Detect section start
+        if el.name == "h2":
+            text = el.get_text(strip=True).lower()
+            if "lifts" in text:
+                section = "lifts"
+            elif "trails" in text:
+                section = "trails"
+            continue
 
-    except Exception as e:
-        print(f"Error occurred: {e}")
-        num_trails, num_lifts, base_depth, new_snow = 0, 0, 0, 0
+        # Skip if not inside a section
+        if el.name != "article" or not section:
+            continue
 
-    finally:
-        # Quit the driver
-        driver.quit()
+        # Read status field
+        status_div = el.select_one("div.cell.status")
+        status_text = status_div.get_text(strip=True).lower() if status_div else ""
 
-    # Prepare the result
-    data_dict = {
+        is_open = ("open" in status_text) and ("closed" not in status_text)
+
+        if section == "lifts":
+            if is_open:
+                lifts_open += 1
+
+        if section == "trails":
+            if is_open:
+                trails_open += 1
+
+    return {
         "SASKADENA SIX": {
-            "trails": num_trails,
-            "lifts": num_lifts,
-            "base depth": base_depth,
-            "new snow": new_snow
+            "lifts": lifts_open,
+            "trails": trails_open,
         }
     }
-    return data_dict
+
 
 
 def get_final_json_data():
@@ -3294,14 +3302,14 @@ def get_final_json_data():
 #         data = { 'MCINTYRE' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_59_website()
-        print('59 website is done scraping' )
-    except:
-        data = { 'TENNEY MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_59_website()
+#         print('59 website is done scraping' )
+#     except:
+#         data = { 'TENNEY MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_60_website()
@@ -3311,13 +3319,13 @@ def get_final_json_data():
 #         None
 #     final_json.append(data)
 # # #-----------------------------------
-#     try:
-#         data = get_61_website()
-#         print('61 website is done scraping' )
-#     except:
-#         data = { 'SASKADENA SIX' : empty_data_dict }
-#         None
-#     final_json.append(data)
+    try:
+        data = get_61_website()
+        print('61 website is done scraping' )
+    except:
+        data = { 'SASKADENA SIX' : empty_data_dict }
+        None
+    final_json.append(data)
 #-----------------------------------
     # if new_source == True:
     #     print('52 website is done scraping' )
