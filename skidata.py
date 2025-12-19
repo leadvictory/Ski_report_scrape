@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup as bs
 import time
 import os
 from io import StringIO
-import numpy
 # ft
 
 from selenium import webdriver
@@ -727,10 +726,6 @@ def get_16_website():
 
 # In[21]:
 
-
-# ft
-from seleniumbase import Driver
-
 def safe_int(val):
     """
     Safely convert lift/trail numbers to int.
@@ -752,12 +747,7 @@ def get_17_website():
     url = "https://www.jiminypeak.com/The-Mountain/Mountain-Information/Snow-Report/"
 
     # Launch real Chrome to bypass Cloudflare fully
-    driver = Driver(
-        browser="chrome",
-        headless=True,                  # Headless often fails with Cloudflare
-        undetected=True,                 # REQUIRED for CF
-        incognito=True,
-    )
+    driver = headless_browser()
 
     try:
         driver.open(url)
@@ -768,13 +758,18 @@ def get_17_website():
         # SHORT additional wait to ensure values update
         time.sleep(40)
 
-        # Extract using data-stat attributes
-        depth = driver.get_text('[data-stat="depth"]')
-        snowfall = driver.get_text('[data-stat="snowfall"]')
-        lifts_day = driver.get_text('[data-stat="lifts-day"]')
-        lifts_night = driver.get_text('[data-stat="lifts-night"]')
-        trails_day = driver.get_text('[data-stat="trails-day"]')
-        trails_night = driver.get_text('[data-stat="trails-night"]')
+        def tx(css):
+            try:
+                return driver.find_element(By.CSS_SELECTOR, css).text.strip()
+            except:
+                return ""
+
+        depth = tx('[data-stat="depth"]')
+        snowfall = tx('[data-stat="snowfall"]')
+        lifts_day = tx('[data-stat="lifts-day"]')
+        lifts_night = tx('[data-stat="lifts-night"]')
+        trails_day = tx('[data-stat="trails-day"]')
+        trails_night = tx('[data-stat="trails-night"]')
 
         data = {
             "JIMINY PEAK": {
@@ -3454,11 +3449,11 @@ def get_final_json_data():
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, numpy.integer):
+        if isinstance(obj, np.integer):
             return int(obj)
-        if isinstance(obj, numpy.floating):
+        if isinstance(obj, np.floating):
             return float(obj)
-        if isinstance(obj, numpy.ndarray):
+        if isinstance(obj, np.ndarray):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
  
@@ -3511,13 +3506,3 @@ def write_final_json_file():
 # schedule.every(3).minutes.do(write_final_json_file)
 write_final_json_file()
 # time.sleep(20)
-
-try:
-    driver.close()
-except:
-    None
-    
-try:
-    driver.quit()
-except:
-    None
