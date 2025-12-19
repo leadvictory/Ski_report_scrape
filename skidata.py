@@ -16,7 +16,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 t1 = time.time()
 
 def headless_browser():
@@ -24,7 +25,7 @@ def headless_browser():
     
     options = webdriver.ChromeOptions()
     
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
     options.add_argument("--incognito")
     options.add_argument("--disable-site-isolation-trials")
     options.add_argument("--window-size=1920,1080")
@@ -171,13 +172,7 @@ def get_6_website():
     try:
         trails_num = int([v for v in vals if "Trails Open:" in v][0].split("Trails Open:")[-1].strip('""'))
     except:
-        trails_num = 0
-        
-    try:
-        night_trails_num = int([v for v in vals if "Trails Open:" in v][0].split("Trails Open:")[-1].strip('""'))
-    except:
-        night_trails_num = 0
-        
+        trails_num = 0 
         
     try:
         lifts_num = int([v for v in vals if "Lifts Open:" in v][0].split("Lifts Open:")[-1].strip('""'))
@@ -302,22 +297,7 @@ def get_10_website():
     "last updated on 16 dec 2023"
     """SADDLEBACK:  https://www.saddlebackmaine.com/mountain-report/"""
     
-    options = webdriver.ChromeOptions()
-    
-#     activete "headless" to make the driver hidden
-    # options.add_argument("--headless")
-    options.add_argument("--incognito")
-    options.add_argument("--disable-site-isolation-trials")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument('--no-sandbox')
-    options.add_argument("--disable-extensions")
-    
-#     to install the driver if not installed
-#     driver = webdriver.Firefox(options=options)
-    
-#     repeated step
-#     to operate the driver
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = headless_browser()
     
     url = "https://www.saddlebackmaine.com/mountain-report/#overview"
     driver.get(url)
@@ -328,7 +308,6 @@ def get_10_website():
     soup = bs(driver.page_source , "lxml")
 
     lifts = soup.select("div#data-open-lifts-value")[0].text
-    print(lifts)
     num_lifts = int(lifts.strip("\n \t").split("/")[0])
 
     trails = soup.select("div#data-open-trails-value")[0].text
@@ -341,8 +320,6 @@ def get_10_website():
     min_depth = soup.select("div#data-base-depth-value")[0].text
     num_min_depth = int(min_depth.replace("Base Depth Min" , "").strip('"\n\t ').split("/")[0])
 
-
-    num_max_depth = 0
     driver.quit()
     data_dict = {"SADDLEBACK" : {"lifts" : num_lifts,
                                 "trails" : num_trails,
@@ -359,12 +336,7 @@ def get_11_website():
     
     url = "https://www.pleasantmountain.com/mountain-report"
     
-    # Initialize Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')  # Run headlessly
-    options.add_argument('--disable-gpu')
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = headless_browser()
     
     # Load the page
     driver.get(url)
@@ -405,12 +377,8 @@ def get_12_website():
     """SUGARLOAF:  https://www.sugarloaf.com/mountain-report"""
     
     url = "https://www.sugarloaf.com/mountain-report"
-    
-    # Initialize Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run in headless mode
-    options.add_argument("--disable-gpu")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    driver = headless_browser()
     
     # Load the webpage
     driver.get(url)
@@ -459,10 +427,7 @@ def get_13_website():
     
     url = "https://www.sundayriver.com/mountain-report"
     
-    # Initialize WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = headless_browser()
     
     # Load the page
     driver.get(url)
@@ -500,6 +465,7 @@ def get_13_website():
 
 # ft
 def get_14_website():
+
     """BERKSHIRE EAST: https://berkshireeast.com/winter/mountain-conditions"""
     headers = {
         'authority': 'berkshireeast.com',
@@ -550,9 +516,6 @@ def get_14_website():
     }
 
     return data_dict
-
-URL = "https://bousquetmountain.com/lift-trail-status/"
-
 
 def extract_items(container):
     """Generic extractor for lifts OR trails."""
@@ -627,11 +590,24 @@ def parse_trails(soup):
     return trails, open_count, len(trails)
 
 def get_15_website():
-    r = requests.get(URL)
-    soup = bs(r.text, "lxml")
+    URL = "https://bousquetmountain.com/lift-trail-status/"
+    driver = headless_browser()
+    driver.get(URL)
+    time.sleep(5)
+    wait = WebDriverWait(driver, 10)
+
+    close_btn = wait.until(EC.element_to_be_clickable(
+        (By.CSS_SELECTOR, "a.dialog-close-button.dialog-lightbox-close-button")
+    ))
+
+    close_btn.click()
+    time.sleep(3)
+    soup = bs(driver.page_source, "lxml")
 
     # ---- LIFTS ----
     lift_container = soup.select_one('div[data-id="2056269"]')
+    if lift_container:
+        print("Lift container exists ✔")
     lifts, lifts_open, lifts_total = extract_items(lift_container)
 
     # ---- TRAILS ----
@@ -3061,14 +3037,14 @@ def get_final_json_data():
 #         data = { 'BERKSHIRE EAST' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # #-----------------------------------
-#     try:
-#         data = get_15_website()
-#         print('15 website is done scraping' )
-#     except:
-#         data = { 'BOUSQUET' : empty_data_dict }
-#         None
-#     final_json.append(data)
+# #-----------------------------------
+    try:
+        data = get_15_website()
+        print('15 website is done scraping' )
+    except:
+        data = { 'BOUSQUET' : empty_data_dict }
+        None
+    final_json.append(data)
 # #-----------------------------------
 #     try:
 #         data = get_16_website()
