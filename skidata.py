@@ -2220,41 +2220,6 @@ def get_47_website():
     return data_dict
 
 
-def get_48_website():
-    """SMUGGLERS NOTCH: https://www.smuggs.com/conditions/winter-report/"""
-    
-    url = "https://www.smuggs.com/conditions/winter-report/"
-    r = requests.get(url)
-    soup = bs(r.text, "lxml")
-    
-    # Extract Trails Open
-    trails_section = soup.select_one("div.totals-grid .report-totals_subset").text.strip()
-    num_trails = int(trails_section)  # Trails Open
-
-    # Extract Lifts Open
-    lifts_section = soup.select("div.totals-grid")[3].select_one(".report-totals_subset").text.strip()
-    num_lifts = int(lifts_section)  # Lifts Open
-
-    # Extract New Snow
-    new_snow_section = soup.select_one("div.totals-grid .report-snow-data span.report-snow-data_amount").text.strip()
-    new_snow = int(new_snow_section.split("″")[0])  # New Snowfall
-
-    # Extract Man-Made Snow Depth
-    man_made_snow_depth_section = soup.select_one("p:contains('Man-Made Snow Depth')").text
-    man_made_snow_depth = int(man_made_snow_depth_section.split(":")[1].split(" ")[0])  # Man-Made Snow Depth
-
-    data_dict = {
-        "SMUGGLERS NOTCH": {
-            "trails": num_trails,
-            "lifts": num_lifts,
-            "new snow": new_snow,
-            "man-made snow depth": man_made_snow_depth
-        }
-    }
-    
-    return data_dict
-
-
 # ft
 def get_48_website():
     """SMUGGLERS NOTCH: https://www.smuggs.com/conditions/winter-report/"""
@@ -2265,28 +2230,28 @@ def get_48_website():
     
     # Extract Trails Open
     try:
-        trails_section = soup.find("p", text="Trails Open").find_previous_sibling("div").find("span", class_="report-totals_subset")
+        trails_section = soup.find("p", string="Trails Open").find_previous_sibling("div").find("span", class_="report-totals_subset")
         num_trails = int(trails_section.text.strip())
     except Exception:
         num_trails = 0
 
     # Extract Lifts Open
     try:
-        lifts_section = soup.find("p", text="Lifts Open").find_previous_sibling("div").find("span", class_="report-totals_subset")
+        lifts_section = soup.find("p", string="Lifts Open").find_previous_sibling("div").find("span", class_="report-totals_subset")
         num_lifts = int(lifts_section.text.strip())
     except Exception:
         num_lifts = 0
 
     # Extract New Snow
     try:
-        new_snow_section = soup.find("p", text="New Snowfall").find_previous_sibling("div").find("span", class_="report-snow-data_amount")
+        new_snow_section = soup.find("p", string="New Snowfall").find_previous_sibling("div").find("span", class_="report-snow-data_amount")
         new_snow = int(new_snow_section.text.replace("″", "").strip())
     except Exception:
         new_snow = 0
 
     # Extract Man-Made Snow Depth
     try:
-        man_made_snow_section = soup.find("p", text="Man-Made Snow Depth: 20 to 40″")
+        man_made_snow_section = soup.find("p", string="Man-Made Snow Depth: 20 to 40″")
         man_made_snow_depth = int(man_made_snow_section.text.split(":")[1].split()[0])
     except Exception:
         man_made_snow_depth = 0
@@ -2355,10 +2320,7 @@ def get_52_website():
 
     url = "https://www.loonmtn.com/mountain-report"
 
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless") 
-    options.add_argument("--disable-gpu")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = headless_browser()
 
     try:
         driver.get(url)
@@ -2550,8 +2512,10 @@ def get_56_website():
     """SKI BRADFORD:  https://skibradford.com/snow-report/"""
     
     url = "https://skibradford.com/snow-report/"
-    r = requests.get(url)
-    soup = bs(r.text, "lxml")
+    driver = headless_browser()
+    driver.get(url)
+    time.sleep(5)
+    soup = bs(driver.page_source, "lxml")
     
     try:
         # Extract Trails count
@@ -3233,14 +3197,14 @@ def get_final_json_data():
 #         data = { 'MAGIC MOUNTAIN' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_45_website()
-        print('45 website is done scraping' )
-    except:
-        data = { 'MIDDLEBURY SNOW BOWL' : empty_data_dict }
-        None
-    final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_45_website()
+#         print('45 website is done scraping' )
+#     except:
+#         data = { 'MIDDLEBURY SNOW BOWL' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_46_website()
@@ -3297,7 +3261,7 @@ def get_final_json_data():
 #         data = { 'LOON' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # -----------------------------------
+# -----------------------------------
 #     try:
 #         data = get_53_website()
 #         print('53 website is done scraping' )
@@ -3321,14 +3285,14 @@ def get_final_json_data():
 #         data = { 'BIG MOOSE MOUNTAIN' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # #-----------------------------------
-#     try:
-#         data = get_56_website()
-#         print('56 website is done scraping' )
-#     except:
-#         data = { 'SKI BRADFORD' : empty_data_dict }
-#         None
-#     final_json.append(data)
+# #-----------------------------------
+    try:
+        data = get_56_website()
+        print('56 website is done scraping' )
+    except:
+        data = { 'SKI BRADFORD' : empty_data_dict }
+        None
+    final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_57_website()
