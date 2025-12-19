@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup as bs
 import time
 import os
 from io import StringIO
+import numpy
 # ft
 
 from selenium import webdriver
@@ -24,7 +25,6 @@ def headless_browser():
     
     options = webdriver.ChromeOptions()
     
-    # activete "headless" to make the driver hidden
     # options.add_argument("--headless")
     options.add_argument("--incognito")
     options.add_argument("--disable-site-isolation-trials")
@@ -35,64 +35,10 @@ def headless_browser():
 #     to install the driver if not installed
 #     driver = webdriver.Firefox(options=options)
     
-#     repeated step
 #     to operate the driver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     
     return driver
-
-# driver = headless_browser()
- 
-# def get_1_website():
-#     """MOHAWK MOUNTAIN:  https://www.mohawkmtn.com/snow-report/"""   
-    
-#     url = "https://www.mohawkmtn.com/snow-report/"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     trails = soup.select("div.cell.open-night-skiing-trails")[0].text
-#     lifts = soup.select("div.cell.open-night-skiing-lifts")[0].text
-    
-#     if trails == "":
-#         trails = "0"
-        
-#     if lifts == "":
-#         lifts = "0"
-        
-#     data_dict = {"MOHAWK MOUNTAIN": {"trails" : trails ,
-#                 "lifts" : lifts}}
-    
-#     return data_dict
-
-# newer version
-# ft
-# def get_1_website():
-#     "last updated on 16 dec 2023 "
-#     "working but the client asked to take the data from another page on the same website"
-    
-#     """MOHAWK MOUNTAIN:  https://www.mohawkmtn.com/snow-report/"""
-    
-#     global driver
-    
-#     url = "https://www.mohawkmtn.com/snow-report/"
-#     driver.get(url )
-#     time.sleep(45)
-#     r = driver.page_source
-#     soup = bs(r , "lxml")
-    
-#     trails = soup.select("div.cell.open-night-skiing-trails")[0].text
-#     lifts = soup.select("div.cell.open-night-skiing-lifts")[0].text
-    
-#     if trails == "":
-#         trails = 0
-        
-#     if lifts == "":
-#         lifts = 0
-        
-#     data_dict = {"MOHAWK MOUNTAIN" : {"trails" : int(trails) ,
-#                 "lifts" : int(lifts)}}
-    
-#     return data_dict
 
 def get_1_website():
     
@@ -124,10 +70,6 @@ def get_1_website():
         
     return data_dict
 
-
-# In[5]:
-
-
 # ft
 def get_2_website():
     """MOUNT SOUTHINGTON:  https://mountsouthington.com/trails-and-conditions/"""
@@ -154,45 +96,8 @@ def get_2_website():
     return data_dict
 # In[6]:
 
-
-# ft
-#def get_3_website():
-#
-# In[7]:
-
 lists = ["MOHAWK MONTAIN" , "MOUNT SOUTHINGTON" , "POWDER RIDGE" , "SKI SUNDOWN" , "BIGROCK"]
 
-# ft
-# def get_4_website():
-    
-#     """SKI SUNDOWN:  https://skisundown.com/the-mountain/mountain-information/conditions-report/"""
-    
-#     url = "https://skisundown.com/the-mountain/mountain-information/conditions-report/"
-#     headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',}
-    
-#     r = requests.get(url , headers = headers)
-#     soup = bs(r.text , "lxml")
-    
-#     data_table = soup.select("div.row.conditions")[0]
-#     data_rows = [ d for p in data_table for d in p.text.split("\n") if d.strip() != ""]
-#     lifts = [l for l in data_rows if "Num. of Lifts Open:" in l][0].split("Num. of Lifts Open:")[1]
-#     trails = [t for t in data_rows if "Num. of Trails Open:" in t][0].split("Num. of Trails Open:")[1]
-#     try:
-#         depth = re.findall("\d+" , [t for t in data_rows if "Base Snow:" in t][0].split("Base Snow:")[1])[0]
-#     except:
-#         depth = 0
-
-#     try:
-#         new_snow = re.findall("\d+" , [t for t in data_rows if "New Snow 24hrs:" in t][0].split("New Snow 24hrs:")[1])[0]
-#     except:
-#         new_snow = 0
-    
-#     data_dict = {"SKI SUNDOWN" : {"trails" : int(trails) ,
-#                  "lifts" : int(lifts) ,
-#                  "depth" : int(depth),
-#                  "new snow" : new_snow}}
-    
-#     return data_dict 
 def get_4_website():
     
     """SKI SUNDOWN:  https://skisundown.com/the-mountain/mountain-information/conditions-report/"""
@@ -235,56 +140,6 @@ def get_4_website():
     return data_dict 
 
 
-
-# In[ ]:
-
-
-
-
-
-# In[8]:
-
-
-# ft
-# def get_5_website():
-    
-#     """BIGROCK:  https://www.bigrockmaine.com/trails/"""
-    
-#     url = "https://www.bigrockmaine.com/trails/"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     tables = pd.read_html(StringIO(r.text)) 
-    
-#     try:
-#         depth = int(re.findall( "\d+" , tables[0].set_index(0).loc["Base Depth:" , 1])[0])
-#     except:
-#         depth = 0
-
-    
-#     try:
-#         new_snow = float(re.findall("\d+" , tables[0].set_index(0).loc["Snowfall (24hr):" , 1])[0])
-#     except:
-#         new_snow = 0
-#         None
-    
-#     trails_list = tables[1].loc[: , 3][1:].tolist()
-#     trails = np.sum([1 if t == "OPEN" else 0 for t in trails_list])
-    
-    
-#     lifts_list = tables[2].loc[: , 2][1:].tolist()
-#     lifts = np.sum([1 if t == "OPEN" else 0 for t in lifts_list])
-    
-#     data_dict = {"BIGROCK" : {"trails" : trails,
-#                  "lifts" : lifts ,
-#                  "depth" : depth ,
-#                  "new snow" : new_snow} }
-    
-#     return data_dict
-
-# In[9]:
-
-
 # ft
 def flatten_lists(list_of_lists):
     final_list = []
@@ -293,35 +148,6 @@ def flatten_lists(list_of_lists):
         
     return final_list
 
-
-# In[10]:
-
-
-# ft
-# def get_6_website():
-#     """BLACK MOUNTAIN NH:  https://www.blackmt.com/conditions"""
-    
-#     url = "https://www.blackmt.com/conditions"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-#     all_divs = soup.select("div[data-testid='richTextElement']")
-#     main_titles = [(index , div ) for index , div in zip( range(len(all_divs)) , all_divs )  if len(div.select("h4.font_4")) > 0]
-    
-#     lifts_div_index = [ d[0] for d in main_titles  if "Lifts" in d[1].text][0]
-#     trails_div_index = [ d[0] for d in main_titles  if "Beginner" in d[1].text][0]
-    
-#     all_lifts_section = all_divs[lifts_div_index : ]
-#     all_trails_section = all_divs[ trails_div_index : ]
-    
-#     all_lifts = [l.text for l in flatten_lists([l.select("h2.font_2 > span") for l in all_lifts_section])  if l.text.strip(" \u200b\n\t") != ""]
-#     all_trails = [l.text for l in flatten_lists([l.select("h2.font_2 > span > span > span") for l in all_trails_section]) if l.text.strip(" \u200b\n\t") != ""]
-    
-#     lifts_num = len(all_lifts) - len([t for t in all_lifts if t.lower() == "closed"]) 
-#     trails_num =  (len(all_trails)) - len([t for t in all_trails if t.lower() == "closed"]) 
-    
-#     data_dict = {"BLACK MOUNTAIN NH" : {"trails" : int(trails_num),
-#                     "lifts" : int(lifts_num) } }
-#     return data_dict
 
 def get_6_website():
     """ BLACK MOUNTAIN ME: skiblackmountain.org/mountain-report """
@@ -369,71 +195,6 @@ def get_6_website():
     return data_dict
 
 
-
-
-# In[11]:
-
-
-# ft
-# def get_7_website():
-#     """CAMDEN SNOW BOWL:  https://camdensnowbowl.com/current-conditions/"""
-    
-#     global scraper
-    
-#     r = scraper.get("https://camdensnowbowl.com/current-conditions/")
-#     soup = bs(r.text , "lxml")
-#     tables = pd.read_html(StringIO(r.text))
-#     info = tables[-1]
-#     info.columns = info.iloc[0 , :]
-#     info = info.iloc[1: , :]
-#     info_dict = info.to_dict(orient = "records")[0]
-#     data_dict = {"CAMDEN SNOW BOWL" : {"lifts" : int(info_dict["LIFTS"])  , 
-#                                       "trails" : int(info_dict["TRAILS"]) , 
-#                                       "new snow" : int(info_dict["NEW SNOW"].strip('"'))}}
-    
-#     return data_dict
-
-# the newer version
-# ft
-# def get_7_website():
-#     """CAMDEN SNOW BOWL:  https://camdensnowbowl.com/current-conditions/"""
-    
-#     global scraper
-    
-#     headers = {
-#         'authority': 'camdensnowbowl.com',
-#         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-#         'accept-language': 'en-US,en;q=0.9',
-#         'cache-control': 'max-age=0',
-#         'dnt': '1',
-# #         'if-modified-since': 'Tue, 24 Jan 2023 16:37:12 GMT',
-#         'sec-ch-ua': '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
-#         'sec-ch-ua-mobile': '?0',
-#         'sec-ch-ua-platform': '"Windows"',
-#         'sec-fetch-dest': 'document',
-#         'sec-fetch-mode': 'navigate',
-#         'sec-fetch-site': 'none',
-#         'sec-fetch-user': '?1',
-#         'upgrade-insecure-requests': '1',
-#         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
-#     }
-    
-#     r = requests.get('https://camdensnowbowl.com/current-conditions/', headers=headers)
-#     soup = bs(r.text , "lxml")
-#     tables = pd.read_html(StringIO(r.text))
-
-#     info = tables[1]
-    
-#     info.columns = info.iloc[0 , :]
-#     info = info.iloc[1: , :]
-#     info = info.replace("-" , "0")
-#     info_dict = info.to_dict(orient = "records")[0]
-#     data_dict = {"CAMDEN SNOW BOWL" : {"lifts" : int(info_dict["LIFTS"].split("/")[0])  , 
-#                                       "trails" : int(info_dict["TRAILS"].split("/")[0]) , 
-#                                       "new snow" : int(info_dict["NEW SNOW"].strip('"'))}}
-    
-#     return data_dict
-
 def get_7_website():
     url = "https://camdensnowbowl.com/current-conditions/"
 
@@ -448,11 +209,6 @@ def get_7_website():
     # Extract ALL the <span class="number"> values
     # -----------------------------
     numbers = [n.get_text(strip=True) for n in soup.select("span.number")]
-
-    # Expected order:
-    # numbers[0] = Snow Base
-    # numbers[1] = Trails Open
-    # numbers[2] = Lifts Open
 
     snow_base = numbers[0] if len(numbers) > 0 else ""
     trails_open = numbers[1] if len(numbers) > 1 else ""
@@ -470,41 +226,6 @@ def get_7_website():
     }
 
     return data_dict
-
-
-
-
-# In[12]:
-
-
-# ft
-# def get_8_website():
-#     """LOST VALLEY:  https://www.lostvalleyski.com/conditions/"""
-    
-#     url = "https://www.lostvalleyski.com/conditions/"
-#     r = scraper.get(url)
-#     soup = bs(r.text , "lxml")
-#     trails_section = soup.select("body > div.wrap > div > main > section.snocountry.flex-section.relative.pb-0 > div > div > div > div:nth-child(2) > div > div:nth-child(3)")[0]
-#     num_trails = len([ t for t in trails_section.text.split("\n") if (t.strip() != "") and (t != 'OPEN TRAILS')])
-    
-#     data_dict = {"LOST VALLEY" : {"trails" : num_trails}}
-#     return data_dict
-
-# the newer version
-# ft
-# def get_8_website():
-#     """LOST VALLEY:  https://www.lostvalleyski.com/conditions/"""
-    
-#     url = "https://www.lostvalleyski.com/conditions/"
-#     r = scraper.get(url)
-#     soup = bs(r.text , "lxml")
-#     trails_section = soup.select("body > div.wrap > div > main > section.snocountry.flex-section.relative.pb-0 > div > div > div > div:nth-child(2) > div > div:nth-child(3) > p.w-full.text-left.snocountry-data.leading-snug.text-dusk-blue")[0]
-# #     num_trails = len([ t for t in trails_section.text.split("\n") if (t.strip() != "") and (t != 'OPEN TRAILS')])
-#     num_trails = trails_section.text
-    
-#     data_dict = {"LOST VALLEY" : {"trails" : num_trails}}
-#     return data_dict
-# # In[13]:
 
 def get_8_website():
     "last updated on 13 Jan 2024"
@@ -527,106 +248,6 @@ def get_8_website():
     data_dict = {"LOST VALLEY" : {"trails" : num_trails,
                                  "lifts" : num_lifts}}
     return data_dict
-
-
-
-# ft
-# def get_9_website():
-    
-#     """MOUNT ABRAM:  https://mtabram.com/?page_id=1419"""
-    
-    
-#     url = "https://mtabram.com/?page_id=1419"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     table = pd.read_html(r.text)[0]
-#     table.columns = ["titles" , "kind" , "status" , "snow_status"]
-    
-#     lifts_index = table.index[table["kind"] == "LIFTS"].tolist()[0]
-#     trails_index = table.index[table["kind"] == "TRAILS"].tolist()[0]
-    
-#     lifts_section = table.iloc[lifts_index + 1 : trails_index , :]["status"].tolist()
-#     num_lifts = np.sum([1 if s == "OPEN" else 0 for s in lifts_section])
-    
-#     trails_section = table.iloc[trails_index + 1 : , :]["status"].tolist()
-#     num_trails = np.sum([1 if s == "OPEN" else 0 for s in trails_section])
-    
-#     data_dict = {"MOUNT ABRAM" : {"trails" : num_trails,
-#                                  "lifts" : num_lifts}}
-#     return data_dict
-
-
-# the newer version
-# ft
-# def get_9_website():
-    
-#     """MOUNT ABRAM:  https://mtabram.com/?page_id=1419"""
-    
-    
-#     url = "https://mtabram.com/?page_id=1419"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-    
-#     i_frame = soup.select("#main-content > div:nth-child(3) > div.wpb_row.row > div > div > div.wpb_text_column.wpb_content_element > div > div > iframe")[0].get("src")
-#     r2 = requests.get(i_frame)
-    
-#     table_trails = pd.read_html(r2.text)[1].iloc[1: -2 , :2].dropna()
-#     table_trails["kind"] = "TRAILS"
-    
-#     table_lifts = pd.read_html(r2.text)[0].iloc[1: , :2].dropna()
-#     table_lifts["kind"] = "LIFTS"
-    
-#     table = pd.concat([table_trails , table_trails]).dropna().drop_duplicates().fillna("Closed")
-    
-#     table.columns = ["titles"  , "status" , "kind"]
-    
-#     lifts_section = table[table["kind"] == "LIFTS"]["status"].values.tolist()
-#     trails_section = table[table["kind"] == "TRAILS"]["status"].values.tolist()
-    
-    
-#     num_lifts = np.sum([1 if s != "Closed" else 0 for s in lifts_section])
-    
-#     num_trails = np.sum([1 if s != "Closed" else 0 for s in trails_section])-3
-    
-#     data_dict = {"MOUNT ABRAM" : {"trails" : num_trails,
-#                                  "lifts" : num_lifts}}
-#     return data_dict
-# def get_9_website():
-    
-#     """MOUNT ABRAM:  https://mtabram.com/?page_id=1419"""
-    
-    
-#     url = "https://mtabram.com/?page_id=1419"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-    
-#     i_frame = soup.select("#main-content > div:nth-child(3) > div.wpb_row.row > div > div > div.wpb_text_column.wpb_content_element > div > div > iframe")[0].get("src")
-#     r2 = requests.get(i_frame)
-    
-#     table_trails = pd.read_html(r2.text)[1].iloc[1: -2 , :2].dropna()
-#     table_trails["kind"] = "TRAILS"
-    
-#     table_lifts = pd.read_html(r2.text)[0].iloc[1: , :2].dropna()
-#     table_lifts["kind"] = "LIFTS"
-#     table = pd.concat([table_trails , table_trails]).dropna().drop_duplicates().fillna("Closed")
-    
-#     table.columns = ["titles"  , "status" , "kind"]
-    
-#     lifts_section = table[table["kind"] == "LIFTS"]["status"].values.tolist()
-#     trails_section = table[table["kind"] == "TRAILS"]["status"].values.tolist()
-    
-    
-#     num_lifts = np.sum([1 if s != "Closed" else 0 for s in lifts_section])
-    
-#     num_trails = np.sum([1 if s != "Closed" else 0 for s in trails_section])-3
-    
-#     data_dict = {"MOUNT ABRAM" : {"trails" : num_trails,
-#                                  "lifts" : len(table_lifts)}}
-#     return data_dict
-
 
 def get_9_website():
     """
@@ -677,40 +298,6 @@ def get_9_website():
             "uphills": uphill_open
         }
     }
-
-# get_9_website()
-# In[14]:
-
-
-# ft
-# def get_10_website():
-#     """SADDLEBACK:  https://www.saddlebackmaine.com/mountain-report/"""
-    
-#     url = "https://www.saddlebackmaine.com/mountain-report/"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     lifts = [ d for d in soup.select("div.count-box") if "Lifts Open" in d.text][0].text
-#     num_lifts = int(lifts.replace("Lifts Open" , "").strip("\n").split("/")[0])
-    
-#     trails = [ d for d in soup.select("div.count-box") if "Trails Open" in d.text][0].text
-#     num_trails = int(trails.replace("Trails Open" , "").strip("\n").split("/")[0])
-    
-#     temp = [ d for d in soup.select("div.temp") if "24 HR SNOW" in d.text][0].text
-#     num_temp = int(temp.replace("24 HR SNOW" , "").strip('"\n').split("/")[0])
-    
-#     min_depth = [ d for d in soup.select("div.count-box") if "Base Depth Min" in d.text][0].text
-#     num_min_depth = int(min_depth.replace("Base Depth Min" , "").strip('"\n').split("/")[0])
-    
-    
-#     max_depth = [ d for d in soup.select("div.count-box") if "Base Depth Max" in d.text][0].text
-#     num_max_depth = int(max_depth.replace("Base Depth Max" , "").strip('"\n').split("/")[0])
-    
-#     data_dict = {"SADDLEBACK" : {"lifts" : num_lifts,
-#                                 "trails" : num_trails,
-#                                 "new snow" : num_temp,
-#                                 "depth" : num_min_depth}}
-#     return data_dict
 
 def get_10_website():
     "last updated on 16 dec 2023"
@@ -912,32 +499,6 @@ def get_13_website():
     
     return data_dict
 
-# In[18]:
-
-
-# ft
-# def get_14_website():
-    
-#     """BERKSHIRE EAST:  https://berkshireeast.com/plan/cams-conditions"""
-    
-#     url = "https://berkshireeast.com/plan/cams-conditions"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     all_lists = [d.text.replace("\n" , " ").replace(" " , "") for d in soup.select("div.clearfix.text-formatted.field.field--name-field-copy-first-column.rte.field__item > div")]
-    
-#     num_trails = int([l for l in all_lists if "TrailsOpen" in l][0].replace("TrailsOpen" , "").split("/")[0])
-#     num_lifts = int([l for l in all_lists if "LiftsOpen" in l][0].replace("LiftsOpen" , "").split("/")[0])
-#     new_snow = int([l for l in all_lists if "NewSnowLast24hours" in l][0].replace("NewSnowLast24hours" , "").replace('"' , ""))
-#     depth = int([l for l in all_lists if "MinimumBaseDepth" in l][0].replace("MinimumBaseDepth" , "").replace('"' , ""))
-    
-#     data_dict = {"BERKSHIRE EAST" : {"trails" : num_trails,
-#                                     "lifts" : num_lifts , 
-#                                     "depth" : depth,
-#                                     "new snow" : new_snow}}
-#     return data_dict
-    
-    
 # ft
 def get_14_website():
     """BERKSHIRE EAST: https://berkshireeast.com/winter/mountain-conditions"""
@@ -990,10 +551,6 @@ def get_14_website():
     }
 
     return data_dict
-
-# In[19]:
-import requests
-from bs4 import BeautifulSoup as bs
 
 URL = "https://bousquetmountain.com/lift-trail-status/"
 
@@ -1099,36 +656,6 @@ def get_15_website():
     }
 
 
-# In[20]:
-
-
-# ft
-# def get_16_website():
-    
-#     """CATAMOUNT:  https://catamountski.com/winter/mountain-conditions"""
-    
-#     url = "https://catamountski.com/winter/mountain-conditions"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-#     all_lists = [d.text.replace(" " , "").replace("\n" , '') for d  in soup.select("ul.uk-list.uk-list-striped > li")]
-
-#     num_lifts = int([l for l in all_lists if "LiftsOpen:" in l][0].replace("LiftsOpen:" , "").split("/")[0])
-    
-#     try:
-#         new_snow = float([l for l in all_lists if "NewSnowLast24hours:" in l][0].strip('"').replace("NewSnowLast24hours:" , ""))
-#     except:
-#         new_snow = 0
-    
-#     depth = float([l for l in all_lists if "MinimumBaseDepth:" in l][0].strip('"').replace("MinimumBaseDepth:" , ""))
-    
-#     num_trails = int([l for l in all_lists if "TrailsOpen:" in l][0].replace("TrailsOpen:" , "").split("/")[0])
-    
-#     data_dict = {"CATAMOUNT" : {"trails" : num_trails,
-#                                "lifts" : num_lifts,
-#                                "depth" : depth , 
-#                                "new snow" : new_snow}}
-#     return data_dict
-
 def get_16_website():
     """CATAMOUNT: https://catamountski.com/winter/the-mountain/mountain-conditions"""
 
@@ -1203,7 +730,7 @@ def get_16_website():
 
 # ft
 from seleniumbase import Driver
-import time
+
 def safe_int(val):
     """
     Safely convert lift/trail numbers to int.
@@ -1266,42 +793,6 @@ def get_17_website():
         driver.quit()
 
 
-
-
-# In[22]:
-
-
-# ft
-# def get_18_website():
-    
-#     """NASHOBA VALLEY:  https://skinashoba.com/snow_report/"""
-    
-#     url = "https://skinashoba.com/snow_report/"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     tables = pd.read_html(StringIO(r.text))
-    
-#     trails_table = tables[2]
-#     trails_table.columns = trails_table.iloc[0 , :]
-#     trails_table = trails_table.iloc[1: , :]
-#     num_trails = np.sum([ 1 if "OPEN" in t else 0 for t in trails_table.Status.tolist()])
-    
-#     lifts_table = tables[3]
-#     lifts_table.columns = lifts_table.iloc[0 , :]
-#     lifts_table = lifts_table.iloc[1 : , :]
-#     num_lifts = np.sum([ 1 if "OPEN" in t else 0 for t in lifts_table.dropna().Status.tolist()])
-    
-#     orig_table = tables[0].set_index(0).T
-    
-#     depth = int(orig_table["Base Depth"].tolist()[0].split("-")[0].strip('″"'))
-#     new_snow = int(orig_table["Recent Snowfall (24 hours)"].tolist()[0].strip('″"'))
-    
-#     data_dict = {"NASHOBA VALLEY" : {"trails" : num_trails , 
-#                                     "lifts" : num_lifts,
-#                                     "depth" : depth,
-#                                     "new snow" : new_snow}}
-#     return data_dict
 def get_18_website():
     "last updated on 13 Jan 2024"
     """NASHOBA VALLEY:  https://skinashoba.com/snow_report/"""
@@ -1352,56 +843,6 @@ def get_18_website():
     return data_dict
 
 
-
-# In[23]:
-
-#ft
-# def get_19_website():
-    
-#     """BRADFORD:  https://skibradford.com/category/current-conditions/ (TRAILS ONLY)"""
-    
-
-    
-#     headers = {
-#         'authority': 'skibradford.com',
-#         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-#         'accept-language': 'en-US,en;q=0.9',
-#         'cache-control': 'max-age=0',
-#         # 'cookie': '_gcl_au=1.1.184952803.1674689409; _fbp=fb.1.1674689409082.2070154183; _ga=GA1.2.1227694022.1674689409; _gid=GA1.2.824277775.1674689409',
-#         'dnt': '1',
-#         'referer': 'https://skibradford.com/category/current-conditions/',
-#         'sec-ch-ua': '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
-#         'sec-ch-ua-mobile': '?0',
-#         'sec-ch-ua-platform': '"Windows"',
-#         'sec-fetch-dest': 'document',
-#         'sec-fetch-mode': 'navigate',
-#         'sec-fetch-site': 'same-origin',
-#         'sec-fetch-user': '?1',
-#         'upgrade-insecure-requests': '1',
-#         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
-#     }
-    
-#     r = requests.get('https://skibradford.com/trail-map/', headers=headers)
-#     soup = bs(r.text , "lxml")
-#     # print(r)
-#     try:
-#         all_ps = [p.text for p in soup.select("p") if "Open Trails" in p.text][0]
-#     except IndexError:
-#         all_ps = "0"
-        
-    
-#     try:
-#         num_trails = int(re.findall("\d+" , all_ps)[0])
-        
-#     except:
-#         num_trails = 0
-        
-        
-#     data_dict = {"BRADFORD" : {"trails" : num_trails}}
-    
-#     return data_dict
-
-
 def get_19_website():
     """Extract trails and lifts from https://skibradford.com/snow-report/"""
 
@@ -1450,42 +891,6 @@ def get_19_website():
             "lifts": lifts
         }
     }
-
-   
-
-# In[24]:
-
-
-# ft
-# def get_20_website():
-    
-#     """BUTTERNUT:  https://skibutternut.com/the-mountain/trails-conditions/condition-report"""
-    
-#     url = "https://skibutternut.com/the-mountain/trails-conditions/condition-report"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     all_lists_labels = [d.text.replace("\n" , "") for d in soup.select("div.report-breakdown > div[class*='col'] > div.row > div.label")]
-#     all_lists_values = [d.text.replace("\n" , "") for d in soup.select("div.report-breakdown > div[class*='col'] > div.row > div.value")]
-#     values_dict = {key : val for key , val in zip(all_lists_labels , all_lists_values)}
-    
-#     base_data = [d.strip() for d in soup.select("div.mountain-printout-info")[0].text.split("        ") if d.strip() != ""]
-    
-#     depth = int([b for b in base_data if "Base Depth:" in b][0].split(":")[-1].split("-")[0])
-#     new_snow = int(re.findall("\d+" , [b for b in base_data if "Natural Snow (last 24 hrs):" in b][0].split(":")[-1])[0])
-    
-#     num_trails = int(values_dict[[k for k in values_dict.keys() if "trails" in k.lower()][0]])
-
-#     num_lifts = int(values_dict[[k for k in values_dict.keys() if "lifts" in k.lower()][0]])
-
-#     data_dict = {"BUTTERNUT" : {"trails" : num_trails , 
-#                                "lifts" : num_lifts,
-#                                "depth" : depth,
-#                                "new snow" : new_snow}}
-#     return data_dict
-import requests
-from bs4 import BeautifulSoup as bs
-import re
 
 def get_20_website():
     """BUTTERNUT: Extract Trails, Lifts, Depth, New Snow from table format"""
@@ -1538,31 +943,6 @@ def get_20_website():
 
     return {"BUTTERNUT": data}
 
-
-# In[25]:
-
-
-# # ft
-# def get_21_website():
-    
-#     """SKI WARD:  https://www.skiward.com/mountain-info/snow-report/"""
-    
-#     url = "https://www.skiward.com/mountain-info/snow-report/"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-#     table = pd.read_html(r.text)[0].iloc[1: , 0:2].set_index(0).T
-    
-#     depth = int(re.findall( "\d+" , table["Average Base Depth:"].tolist()[0])[0])
-    
-#     num_trails = int(re.findall( "\d+" , table["Open Terrain:"].tolist()[0])[0])
-#     num_lifts = int(re.findall( "\d+" , table["Lifts Open"].tolist()[0])[0])
-    
-#     data_dict = {"SKI WARD" : {"trails" : num_trails,
-#                               "lifts" : num_lifts , 
-#                               "depth" : depth}}
-    
-#     return data_dict
-
 # ft
 def get_21_website():
     "last updated on 16 dec 2023"
@@ -1602,13 +982,6 @@ def get_21_website():
                               "depth" : depth_num}}
         
     return data_dict
-
-
-get_21_website()
-
-
-# In[26]:
-
 
 # ft
 def get_22_website():
@@ -1676,42 +1049,8 @@ def get_23_website():
     return data_dict
 
 
-# In[28]:
-
-
-# # ft
-# def get_24_website():
-#     "last updated on 16 Dec - 2023 "
-#     """BRETTON WOODS:  https://www.brettonwoods.com/alpine_conditions/snow_conditions"""
-    
-#     url = "https://www.brettonwoods.com/alpine_conditions/snow_conditions"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     all_lists_main = [d.text.replace("\n" , "").strip() for d in soup.select("div#report-top > div")]
-#     num_trails = int([d for d in all_lists_main if "Trail Count" in d][0].replace("Trail Count"  , "").split("/")[0])
-    
-#     num_lifts = int([d for d in all_lists_main if "Lifts Open" in d][0].replace("Lifts Open"  , "").split("/")[0])
-    
-#     all_lists_sec = [d.text.replace("\n" , "").strip() for d in soup.select("div#report-second")][0]
-    
-#     snow_fall = int(re.findall( 'Snowfall - recent: (.*?)"Snowfall' , all_lists_sec)[0])
-#     depth = int(re.findall( 'Base Depth: (.*?)"Snowmaking:' , all_lists_sec)[0].split("-")[0].strip("""\n\t" ''"""))
-
-    
-#     data_dict = {"BRETTON WOODS" : {"trails" : num_trails , 
-#                                    "lifts" : num_lifts,
-#                                    "depth" : depth,
-#                                    "new snow" : snow_fall}}
-    
-#     return  data_dict
-
-
 def get_24_website():
     """BRETTON WOODS: https://www.brettonwoods.com/snow-trail-report/"""
-
-    import requests, re
-    from bs4 import BeautifulSoup as bs
 
     url = "https://www.brettonwoods.com/snow-trail-report/"
     r = requests.get(url)
@@ -1761,30 +1100,6 @@ def get_24_website():
             "new snow": new_snow
         }
     }
-
-# In[29]:
-
-
-# ft
-# def get_25_website():
-#     """BLACK MOUNTAIN NH:  https://www.blackmt.com/conditions"""
-    
-#     url = "https://www.blackmt.com/conditions"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-#     all_divs = soup.select("#comp-l9efukc5 > div:nth-child(2) > div")[0].text
-#     lifts_section = soup.select("#comp-ldfz7xkz > h5")[0].text
-#     lifts_num = len(re.findall("Open" , lifts_section))
-    
-#     trails_css = ["#comp-kjn15gus" , "#comp-kjn1aua7 > h2" , "#comp-kjn1fbx0 > h2" ,
-#                   "#comp-kjn1janb > h2" , "#comp-kjn1le5q > h2"  , "#comp-kjn1oalr > h2" , 
-#                  "#comp-kjmyh910 > h2" , "#comp-kjmyllyt > h2" , "#comp-kjmyra86 > h2",
-#                  "#comp-kjmzcfrr > h2" , "#comp-kjmzhskb > h2" , "#comp-kjmzkmao > h2"]
-#     trails_sections = [len(re.findall( 'Open' , soup.select(css)[0].text)) for css in trails_css]
-#     trails_num = np.sum(trails_sections)
-
-#     data_dict = {"BLACK MOUNTAIN NH" : {"trails" : int(trails_num),
-#                     "lifts" : int(lifts_num) } }
 
 def get_25_website():
     """BLACK MOUNTAIN NH – https://www.blackmt.com/conditions"""
@@ -1886,38 +1201,6 @@ def get_26_website():
 
     return data_dict
 
-
-# In[31]:
-
-
-# ft
-# def get_27_website():
-#     """CRANMORE:  https://www.cranmore.com/Snow-Report"""
-    
-    
-#     response = requests.get('https://digital.cranmore.com/_module/snow_report/feed.json')
-    
-#     j = json.loads(response.text)
-    
-#     num_trails = np.sum([ 0 if "Closed" in tt else 1 for tt in  [ t[ 'statuses']  for t in j["report"]["facilities"]['trails'] if t['excluded'] == False ]])
-#     num_lifts = np.sum([ 0 if "Closed" in tt else 1 for tt in  [ t[ 'statuses']  for t in j["report"]["facilities"]['lifts']]])
-    
-    
-#     depth = int(j["report"]["currentConditions"]["resortLocations"]["location"]["baseRange"].split("-")[0])
-    
-#     try:
-#         new_snow = int(j["report"]["currentConditions"]["resortLocations"]["location"]["snow24Hours"].split("-")[0])
-#     except:
-#         new_snow = 0
-        
-#     data_dict = {"CRANMORE" : {"trails" : num_trails ,
-#                               "lifts" : num_lifts,
-#                               "depth" : depth,
-#                               "new snow" : new_snow}}
-    
-    
-#     return data_dict
-
 def get_27_website():
     """CRANMORE – https://www.cranmore.com/Snow-Report"""
 
@@ -1970,54 +1253,6 @@ def get_27_website():
             "new snow": snow_24h
         }
     }
-
-
-# In[32]:
-
-
-# ft
-# def get_28_website():
-    
-#     """DARTMOUTH SKIWAY:  https://sites.dartmouth.edu/skiway/mountain/ (LIFTS ONLY)"""
-    
-#     headers = {
-#         'authority': 'www.snocountry.com',
-#         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-#         'accept-language': 'en-US,en;q=0.9,ar;q=0.8',
-#         'dnt': '1',
-#         'referer': 'https://sites.dartmouth.edu/',
-#         'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
-#         'sec-ch-ua-mobile': '?0',
-#         'sec-ch-ua-platform': '"Windows"',
-#         'sec-fetch-dest': 'object',
-#         'sec-fetch-mode': 'navigate',
-#         'sec-fetch-site': 'cross-site',
-#         'upgrade-insecure-requests': '1',
-#         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
-#     }
-    
-#     params = {
-#         'code': 'vr-603008',
-#         'state': 'nh',
-#         'type': 'NA_Alpine',
-#         'region': 'us',
-#         'pettabs': '3',
-#         'size': 'xsmall',
-#         'color': 'white',
-#         'noads': 'no',
-#     }
-    
-#     response = requests.get('https://www.snocountry.com/widget/widget_resort.php', params=params , headers = headers)
-#     tables = pd.read_html(response.text)
-    
-#     df = tables[0]
-#     df.columns = df.iloc[1 , :]
-#     df = df.iloc[2:  ,:]
-    
-#     num_lifts = int(df["Lifts Open"].tolist()[0].split("of")[0].strip())
-    
-#     data_dict = {"DARTMOUTH SKIWAY" : {"lifts" : num_lifts}}
-#     return data_dict
         
 
 def get_28_website():
@@ -2073,12 +1308,6 @@ def get_28_website():
             "new snow": new_snow
         }
     }
-
-        
-
-# In[33]:
-
-
 
 # ft
 def get_29_website():
@@ -2244,37 +1473,6 @@ def get_31_website():
     
     return data_dict
 
-
-# In[36]:
-
-
-# ft
-# def get_32_website():
-#     """PATS PEAK:  https://www.patspeak.com/Plan-Your-Visit/Snow-Report.aspx"""
-    
-#     response = requests.get('https://services.patspeak.com/api/SnowReport/Status')
-    
-#     j = json.loads(response.text)
-    
-#     num_lifts = np.sum([ l["Status"]["Open"] for l in j["Lifts"]])
-#     num_trails = np.sum([ l["Status"]["Open"] for l in j["Trails"] ])
-#     depth = j["Report"]["DepthMin"]
-#     new_snow = j["Report"]["NewSnowPast24HoursMax"]
-    
-#     data_dict = {"PATS PEAK" : {"trails" :num_trails,
-#                                "lifts" : num_lifts,
-#                                "depth" : depth,
-#                                "new snow" : new_snow}}
-    
-#     return data_dict
-    
-# ft
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup as bs
-import re, time
 def get_32_website():
     """PATS PEAK:  https://www.patspeak.com/the-mountain/mountain-info/snow-report/"""
     
@@ -2324,35 +1522,6 @@ def get_32_website():
 
     return data_dict
 
-
-
-# In[37]:
-
-# lls2= ["RAGGED MOUNTAIN" , '']
-# ft
-# def get_33_website():
-    
-#     """RAGGED MOUNTAIN: https://raggedmountainresort.com/Slopes/"""
-    
-#     url = "https://raggedmountainresort.com/Slopes/"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     all_data = soup.select("table:nth-child(1)")[0].text.replace("\n" , "").replace("\xa0" , "")
-    
-#     num_trails = int(re.findall("Slopes Open:(.*?)Lifts" , all_data)[0])
-#     num_lifts = int(re.findall("Lifts Open:(.*?)Average" , all_data)[0])
-#     depth = int(re.findall('Average Base:(.*?)"' , all_data)[0])
-#     new_snow = int(re.findall('24h Snow:(.*?)"' , all_data)[0])
-    
-#     data_dict = {"RAGGED MOUNTAIN" : {"trails" : num_trails , 
-#                                      "lifts" : num_lifts,
-#                                      "depth" : depth , 
-#                                      "new snow" : new_snow}}
-    
-    
-#     return data_dict
-
 def get_33_website():
     "last updated 16 dec 2023"
     """RAGGED MOUNTAIN: https://raggedmountainresort.com/Slopes/"""
@@ -2376,18 +1545,15 @@ def get_33_website():
         
     url = "https://www.raggedmountainresort.com/mountain-report-cams/"
     r = requests.get(url , headers = headers)
-    print(r)
     soup = bs(r.text , "lxml")
     
     all_data = soup.select("div.snow-text")
-    print(all_data[0].text)
     
     num_trails = soup.select("div.slopes-details")[0].select("div.content")[0].select("h4")[0].text.strip().split(" ")[0]
     num_lifts = sum([ 1 if status.lower() == "open" else 0 for status in pd.read_html(str(soup.select("div.lift-name")[0]))[0]["Status"].tolist()])
     
     
     depth = [cond.text.strip(" ''\n\t”") for cond in all_data if "Current Base" in cond.text][0].replace("Current Base" , "").strip(" ''\n\t”").split("-")[0]
-    print(depth)
     new_snow = [cond.text.strip("\n ''\n\t”") for cond in all_data if "Last 24 hrs." in cond.text][0].replace("Last 24 hrs." , "").strip(" ''\n\t”")
     
     data_dict = {"RAGGED MOUNTAIN" : {"trails" : num_trails , 
@@ -2398,62 +1564,8 @@ def get_33_website():
     
     return data_dict
 
-# In[38]:
-
-
-# ft
-# def get_34_website():
-    
-#     """WATERVILLE VALLEY:  https://www.waterville.com/snow-report-maps"""
-    
-#     headers = {
-#         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-#         'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
-#         'Connection': 'keep-alive',
-#         # 'Cookie': 'PHPSESSID=elrbprugavf6p2mr9078pm31m7',
-#         'DNT': '1',
-#         'Referer': 'https://www.waterville.com/',
-#         'Sec-Fetch-Dest': 'iframe',
-#         'Sec-Fetch-Mode': 'navigate',
-#         'Sec-Fetch-Site': 'same-site',
-#         'Upgrade-Insecure-Requests': '1',
-#         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
-#         'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
-#         'sec-ch-ua-mobile': '?0',
-#         'sec-ch-ua-platform': '"Windows"',
-#     }
-    
-#     response = requests.get('https://features.waterville.com/propmaps/map/map/',  headers=headers)
-#     soup = bs(response.text , "lxml")
-    
-#     all_lists = [d.text for d in soup.select("dl.SnowReport-measure")]
-    
-#     num_lifts = int(re.findall("\d+" , [l for l in all_lists if "Open Lifts" in l][0])[0])
-#     num_trails = int(re.findall("\d+" , [l for l in all_lists if "Open Trails" in l][0])[0])
-#     depth = int(re.findall("\d+" , [l for l in all_lists if "Base Depth" in l][0])[0])
-#     try:
-#         new_snow = int(re.findall("\d+" , [l for l in all_lists if "Past 24 Hours in." in l][0].replace("Past 24 Hours in." , ""))[0])
-#     except:
-#         new_snow = 0
-        
-#     data_dict = {"WATERVILLE VALLEY" : {"trails" : num_trails,
-#                                        "lifts" : num_lifts,
-#                                        "depth" : depth,
-#                                        "new snow" :new_snow}}
-    
-    
-#     return data_dict
-
 def get_34_website():
     """WATERVILLE VALLEY: https://www.waterville.com/snow-report-maps"""
-    import time, re
-    from bs4 import BeautifulSoup as bs
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from webdriver_manager.chrome import ChromeDriverManager
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
 
     url = "https://www.waterville.com/snow-report-maps"
 
@@ -2542,77 +1654,12 @@ def get_34_website():
     }
 
 
-# In[39]:
-
-
-# ft
-# def get_35_website():
-#     """WHALEBACK:  https://www.whaleback.com/conditions-trail-report"""
-    
-#     r = requests.get("https://www.whaleback.com/conditions-trail-report")
-#     soup = bs(r.text , "lxml")
-#     iframe= soup.select("#block-yui_3_17_2_1_1608985974347_16168 > div > iframe")[0].get("src").split("&")[0]
-#     tables = pd.read_html(requests.get(iframe).text)
-    
-# #     print(tables[1])
-# #     print("===============")
-#     df = tables[1]
-#     try:
-#         df.columns = ["un" , "label" , "value"]
-#     except:
-#         df.columns = ["un" , "label" , "value" , "total_value"]
-#     df = df.dropna( subset = "label").fillna(0)
-# #     display(df)
-    
-#     try:
-#         num_lifts = int(df[ df["label"].str.contains("Lifts Open:")]["value"].tolist()[0].split("/")[0])
-#     except:
-#         num_lifts = 0
-        
-#     try:
-#         num_trails = int(df[ df["label"].str.contains("Trails Open:")]["value"].tolist()[0].split("/")[0])
-#     except:
-#         num_trails = 0
-        
-#     try:
-#         depth = int(df[ df["label"].str.contains("Base:")]["value"].tolist()[0].strip("""'"'"""))
-#     except:
-#         depth = 0
-        
-#     try:
-#         new_snow = int(df[ df["label"].str.contains("New Snow In The Last 24 Hours:")]["value"].tolist()[0].replace("Inches" , ""))
-#     except:
-#         new_snow = 0
-        
-#     data_dict = {"WHALEBACK" : {"trails" : num_trails , 
-#                                "lifts" : num_lifts,
-#                                "depth" : depth,
-#                                "new snow" : new_snow}}
-    
-    
-#     return data_dict
-
 def get_35_website():
     
     "last updated on 18 Jan 2024"
     """WHALEBACK:  https://www.whaleback.com/trail-report"""
-    
-    options = webdriver.ChromeOptions()
-    
-#     activete "headless" to make the driver hidden
-    options.add_argument("--headless")
-    options.add_argument("--incognito")
-    options.add_argument("--disable-site-isolation-trials")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument('--no-sandbox')
-    options.add_argument("--disable-extensions")
-    
-#     to install the driver if not installed
-#     driver = webdriver.Firefox(options=options)
-    
-#     repeated step
-#     to operate the driver
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    driver = headless_browser()
     
 
     driver.get("https://www.whaleback.com/trail-report")
@@ -2622,10 +1669,8 @@ def get_35_website():
     # Step 1: Enter FIRST iframe
     # -------------------------------
     iframes_lvl1 = driver.find_elements(By.TAG_NAME, "iframe")
-    print("Found level-1 iframes:", len(iframes_lvl1))
 
     first_iframe = iframes_lvl1[1]
-    print("FIRST IFRAME SRC =", first_iframe.get_attribute("src"))
     driver.switch_to.frame(first_iframe)
     time.sleep(2)
 
@@ -2633,10 +1678,7 @@ def get_35_website():
     # Step 2: Enter SECOND iframe
     # -------------------------------
     iframes_lvl2 = driver.find_elements(By.TAG_NAME, "iframe")
-    print("Found level-2 iframes:", len(iframes_lvl2))
-
     second_iframe = iframes_lvl2[-1]
-    print("SECOND IFRAME SRC =", second_iframe.get_attribute("src"))
 
     driver.switch_to.frame(second_iframe)
     time.sleep(2)
@@ -2697,12 +1739,6 @@ def get_35_website():
 
     return data_dict
 
-
-
-
-# In[40]:
-
-
 # ft
 def get_36_website():
     """WILDCAT:  https://www.skiwildcat.com/the-mountain/mountain-conditions/lift-and-terrain-status.aspx"""
@@ -2736,6 +1772,7 @@ def get_36_website():
 
 # ft
 def get_37_website():
+
     """YAWGOO VALLEY:  https://yawgoo.com/winter/report/"""
     
     url = "https://yawgoo.com/winter/report/"
@@ -2757,60 +1794,6 @@ def get_37_website():
     return data_dict
 
 
-# In[42]:
-
-
-#ft
-# def get_38_website():
-    
-#     """BROMLEY:  https://www.bromley.com/the-mountain/snow-report/"""
-#     """ the correct url : https://www.bromley.com/snow-report/"""
-    
-#     url = "https://www.bromley.com/snow-report/"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     all_lists = [d.text.replace("\n" , "") for d in soup.select("div[class*='col-12 col-md-6 col-lg-3']")]
-    
-#     num_lifts = int([l for l in all_lists if "Lifts Open" in l][0].replace("Lifts Open" , "").split("/")[0])
-#     num_trails = int([l for l in all_lists if "Trails Open" in l][0].replace("Trails Open" , "").split("/")[0])
-#     depth = int([l for l in all_lists if "Base Depth" in l][0].replace("Base Depth" , "").split("-")[0].strip('" '))
-#     new_snow = int([l for l in all_lists if "New Snow" in l][0].replace("New Snow" , "").split("-")[0])
-    
-#     data_dict = {"BROMLEY" : {"trails" : num_trails , 
-#                              "lifts" : num_lifts,
-#                              "depth" : depth,
-#                              "new snow" : new_snow}}
-#     return data_dict
-
-# the newer version 
-# ft
-# def get_38_website():
-#     """BOLTON VALLEY:  https://www.boltonvalley.com/winter/trail-maps-snow-reports/snow-reports/"""
-#     url = "https://www.boltonvalley.com/wp-admin/admin-ajax.php"
-
-#     params = {
-#         'action': 'get_prop_conditions',
-#     }
-#     r = scraper.get(url , params = params)
-#     soup = bs(r.text , "lxml")
-    
-#     j = json.loads(r.text)
-    
-#     num_lifts = int(j['report']['facilities']['openDownHillLifts'])
-#     num_trails = int(j['report']['facilities']['openDownHillTrails'])
-#     depth = int(j['report']['currentConditions']['resortLocations']['location']['baseRange'].split("-")[0])
-#     new_snow = int(j['report']['currentConditions']['resortLocations']['location']['snow24Hours'].split("-")[0])
-    
-#     data_dict = {"BOLTON VALLEY" : {"trails" : num_trails , 
-#                                   "lifts" : num_lifts , 
-#                                   "depth" : depth,
-#                                   "new snow" : new_snow} }
-    
-#     return data_dict
-
-
-
 def get_38_website():
 
     url = "https://www.boltonvalley.com/winter/trail-maps-snow-reports/snow-reports/"
@@ -2830,13 +1813,13 @@ def get_38_website():
     # --- FIND THE IFRAME ---
     try:
         iframe = browser.find_element("css selector", "iframe#iframeResizer0, iframe#iFrameResizer0")
-        print("Found iframe:", iframe.get_attribute("id"))
+        # print("Found iframe:", iframe.get_attribute("id"))
     except:
         print("❌ iframe NOT found")
         browser.quit()
         return {}
 
-    print("IFRAME SRC:", iframe.get_attribute("src"))
+    # print("IFRAME SRC:", iframe.get_attribute("src"))
 
     # --- SWITCH INTO IFRAME ---
     browser.switch_to.frame(iframe)
@@ -2893,12 +1876,6 @@ def get_38_website():
     }
 
     return data_dict
-
-
-
-
-
-# In[43]:
 
 
 # ft
@@ -3026,21 +2003,10 @@ def get_40_website():
 
 # ft
 def get_41_website():
-    import time, re
-    from bs4 import BeautifulSoup as bs
-    from selenium import webdriver
-    from selenium.webdriver.chrome.service import Service
-    from webdriver_manager.chrome import ChromeDriverManager
-
     url = "https://jaypeakresort.com/skiing-riding/snow-report-maps/snow-report"
 
-    # --- Setup selenium ---
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
-    browser = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
+
+    browser = headless_browser()
 
     browser.get(url)
     time.sleep(3)
@@ -3048,21 +2014,15 @@ def get_41_website():
     # --- Find the iframe with ID iFrameResizer0 ---
     try:
         iframe = browser.find_element("css selector", "iframe#iframeResizer0, iframe#iFrameResizer0")
-        print("Found iframe:", iframe.get_attribute("id"))
     except Exception:
         print("❌ iframe NOT found")
         browser.quit()
         return
 
-    print("IFRAME SRC:", iframe.get_attribute("src"))
 
     # Switch selenium to the iframe DOM
     browser.switch_to.frame(iframe)
     time.sleep(1)
-
-    # Print iframe page title
-    title = browser.title
-    print("INSIDE IFRAME — TITLE =", title)
 
     # --- Now inside iframe — get HTML ---
     html = browser.page_source
@@ -3111,14 +2071,8 @@ def get_41_website():
 
 
 
-
-
-# In[46]:
-
 # ft
 def get_42_website():
-    import requests
-
     # --- URLs ---
     lifts_url = "https://api.killington.com/api/v1/dor/drupal/lifts"
     trails_url = "https://api.killington.com/api/v1/dor/drupal/trails"
@@ -3161,32 +2115,6 @@ def get_42_website():
     }
 
 
-
-# In[47]:
-
-
-# ft
-# def get_43_website():
-    
-#     """MAGIC MOUNTAIN:  https://magicmtn.com/snow-report/"""
-    
-#     url = "https://magicmtn.com/snow-report/"
-#     r = scraper.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     tables= pd.read_html(r.text,  displayed_only=False)
-#     lift_table = tables[0]
-#     trails_table = pd.concat(tables[1:])
-    
-#     num_lifts = np.sum([ t for t in lift_table["OPEN"].dropna().tolist() if ("yes" in t.lower()) or ("open" in t.lower())])
-#     num_trails = np.sum([ t for t in trails_table["OPEN"].dropna().tolist() if ("yes" in t.lower()) or ("open" in t.lower())])
-#     new_snow = int([ t for t in [d.get("data-number-value") for d in soup.select("div") if "24 HRS" in d.text ] if t != None][0])
-    
-#     data_dict = {"MAGIC MOUNTAIN"  : {"trails" : num_trails , 
-#                                      "lifts" : num_lifts,
-#                                      "new snow" : new_snow}}
-#     return data_dict
-# # 
 def get_43_website():
     "last updated on 13 Jan 2024"
     """MAD RIVER GLEN:  https://www.madriverglen.com/conditions/"""
@@ -3206,63 +2134,7 @@ def get_43_website():
     
     return data_dict 
 
-# In[48]:
-
-
-# # ft
-# def get_44_website():
-    
-#     """MIDDLEBURY SNOW BOWL:  https://www.middleburysnowbowl.com/conditions/"""
-    
-#     url = "https://www.middleburysnowbowl.com/conditions/"
-#     r = requests.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     iframe = soup.select("#post-668 > div > div > p:nth-child(5) > iframe")[0].get("src")
-    
-#     r2 = requests.get(iframe)
-#     soup2 = bs(r2.text , "lxml")
-    
-#     all_lists = [t.text for t in soup2.select("tr")]
-    
-#     num_lifts = int(re.findall("\d+" , [l for l in all_lists if "Lifts open:" in l][0].split("Lifts open:")[1])[0])
-#     num_trails = int(re.findall("\d+" , [l for l in all_lists if "Trails open:" in l][0].split("Trails open:")[1])[0])
-#     depth = int(re.findall("\d+" , [l for l in all_lists if "Base:" in l][0].split("Base:")[1])[0])
-#     new_snow = int(re.findall("\d+" , [l for l in all_lists if "New Snow:" in l][0].split("New Snow:")[1])[0])
-    
-#     data_dict = {"MIDDLEBURY SNOW BOWL" : {"trails" : num_trails ,
-#                                           "lifts" : num_lifts,
-#                                           "depth" : depth,
-#                                           "new snow" : new_snow}}
-#     return data_dict
-
-# newer version
-# ft
-# def get_44_website():
-#     """MAGIC MOUNTAIN:  https://magicmtn.com/snow-report/"""
-    
-#     url = "https://magicmtn.com/snow-report/"
-#     r = scraper.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     tables= pd.read_html(r.text,  displayed_only=False)
-#     lift_table = tables[0]
-#     trails_table = pd.concat(tables[1:])
-    
-#     num_lifts = len([ t for t in lift_table["OPEN"].dropna().tolist() if t == '✓'])
-#     num_trails = len([ t for t in trails_table["OPEN"].dropna().tolist() if ('✓' in t.lower()) ])
-#     new_snow = int([ t for t in [d.get("data-number-value") for d in soup.select("div") if "24 HRS" in d.text ] if t != None][0])
-    
-#     data_dict = {"MAGIC MOUNTAIN"  : {"trails" : num_trails , 
-#                                      "lifts" : num_lifts,
-#                                      "new snow" : new_snow}}
-    
-    
-#     return data_dict
 def get_44_website():
-    import requests
-    from bs4 import BeautifulSoup as bs
-    import re
 
     url = "https://magicmtn.com/snow-report/"
     r = requests.get(url)
@@ -3362,12 +2234,6 @@ def get_45_website():
     
     return data_dict
 
-# get_45_website()
-
-
-# In[50]:
-
-
 
 # ft
 def get_46_website():
@@ -3392,7 +2258,6 @@ def get_46_website():
                               "lifts" : num_lifts,
                               "depth" : depth,
                               "new snow" : new_snow}}
-    
     
     return data_dict
 
@@ -3430,49 +2295,6 @@ def get_47_website():
     
     return data_dict
 
-# ft
-# def get_48_website():
-    
-#     """SMUGGLERS NOTCH:  https://www.smuggs.com/pages/winter/snowReport/"""
-#     url = "https://www.smuggs.com/pages/winter/snowReport/"
-#     r = scraper.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     all_lists = [d.text for d in soup.select("div#trail-summary > p")] + [d.text for d in soup.select("div#base-summary > p")]
-#     num_lifts = int(re.findall("\d+" , [l for l in all_lists if "Lifts" in l][0])[0])
-#     num_trails = int(re.findall("\d+" , [l for l in all_lists if "Trails Open" in l][0])[0])
-#     new_snow = int(re.findall("\d+" , [l for l in all_lists if "New Snow" in l][0])[0])
-    
-#     data_dict = {"SMUGGLERS NOTCH" : {"trails" : num_trails ,
-#                                      "lifts" : num_lifts,
-#                                      "new snow" : new_snow}}
-    
-#     return data_dict
-
-
-# the newer version
-# ft
-# def get_48_website():
-    
-#     """SMUGGLERS NOTCH:  https://www.smuggs.com/pages/winter/snowReport/"""
-#     url = "https://www.smuggs.com/pages/winter/snowReport/"
-#     r = scraper.get(url)
-#     soup = bs(r.text , "lxml")
-    
-#     all_lists = [d.text for d in soup.select("div#trail-summary > p")] + [d.text for d in soup.select("div#base-summary > p")]
-#     num_lifts = int(re.findall("\d+" , [l for l in all_lists if "Lifts" in l][0])[0])
-#     num_trails = int(re.findall("\d+" , [l for l in all_lists if "Trails Open" in l][0])[0])
-    
-#     try:
-#         new_snow = int(re.findall("\d+" , [l for l in all_lists if "New Snow" in l][0])[0])
-#     except:
-#         new_snow = 0
-    
-#     data_dict = {"SMUGGLERS NOTCH" : {"trails" : num_trails ,
-#                                      "lifts" : num_lifts,
-#                                      "new snow" : new_snow}}
-    
-#     return data_dict
 
 def get_48_website():
     """SMUGGLERS NOTCH: https://www.smuggs.com/conditions/winter-report/"""
@@ -3582,10 +2404,6 @@ def get_50_website():
     
     return data_dict
 
-
-# In[54]:
-
-
 # ft
 def get_51_website():
     
@@ -3606,10 +2424,6 @@ def get_51_website():
                               "depth" : depth,
                               "new snow" : new_snow}}
     return data_dict
-
-
-# In[ ]:
-
 
 # ft
 def get_52_website():
@@ -3650,15 +2464,7 @@ def get_52_website():
     finally:
         driver.quit()
 
-# In[55]:
-# empty_data_dict = {"lifts" : 0,
-#                   "trails" : 0,
-#                   "depth" : "",
-#                   "new snow" : ""}
-
 def get_53_website():
-    import requests
-    from bs4 import BeautifulSoup as bs
 
     url = "https://skiburke.com/the-mountain/weather-conditions#lifts"
     r = requests.get(url)
@@ -3725,10 +2531,7 @@ def get_54_website():
     # URL to scrape
     url = "https://skibigmoose.com/trail-report-1"
     
-    # Initialize Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run browser in headless mode
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = headless_browser()
     
     try:
         # Open the website
@@ -3775,11 +2578,7 @@ def get_54_website():
 def get_55_website():
     """BLUE HILLS: https://bluehillsboston.com/"""
     
-    # Set up Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Uncomment to run browser in headless mode
-    options.add_argument("--disable-gpu")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = headless_browser()
     
     try:
         # Navigate to the URL
@@ -3862,11 +2661,7 @@ def get_56_website():
 def get_57_website():
     """GUNSTOCK:  https://www.gunstock.com/winter/snow-report/"""
     
-    # Set up Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run browser in headless mode
-    options.add_argument("--disable-gpu")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = headless_browser()
     
     try:
         # Navigate to the URL
@@ -3973,19 +2768,9 @@ def get_58_website():
 def get_59_website():
     """TENNEY MOUNTAIN: https://skitenney.com/report/"""
 
-    import time, re
-    import requests
-    from bs4 import BeautifulSoup as bs
-    from selenium import webdriver
-    from selenium.webdriver.common.by import By
-    from selenium.webdriver.chrome.service import Service
-    from webdriver_manager.chrome import ChromeDriverManager
-
     url = "https://skitenney.com/snow-report/"
 
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
-    browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    browser = headless_browser()
 
     browser.get(url)
     time.sleep(15)
@@ -4056,10 +2841,7 @@ def get_59_website():
 def get_60_website():
     """PICO: https://www.picomountain.com/the-mountain/conditions-weather/current-conditions-weather"""
 
-    # Set up Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run browser in headless mode
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = headless_browser()
 
     try:
         # Load the page
@@ -4112,10 +2894,7 @@ def get_60_website():
 def get_61_website():
     """SASKADENA SIX: https://www.saskadenasix.com/the-mountain/conditions"""
 
-    # Set up Selenium WebDriver
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run browser in headless mode
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver = headless_browser()
 
     try:
         # Load the page
@@ -4223,14 +3002,14 @@ def get_final_json_data():
 #         data = { 'BLACK MOUNTAIN ME' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # #-----------------------------------
-    try:
-        data = get_7_website()
-        print('7 website is done scraping' )
-    except:
-        data = { 'CAMDEN SNOW BOWL' : empty_data_dict }
-        None
-    final_json.append(data)
+# #-----------------------------------
+#     try:
+#         data = get_7_website()
+#         print('7 website is done scraping' )
+#     except:
+#         data = { 'CAMDEN SNOW BOWL' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_8_website()
@@ -4673,11 +3452,6 @@ def get_final_json_data():
     return final_json
     
 
-
-# In[66]:
-
-
-import numpy
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, numpy.integer):
@@ -4691,8 +3465,6 @@ class NpEncoder(json.JSONEncoder):
 
 
 # In[67]:
-
-print("we are here ")
 
 
 def write_final_json_file():
