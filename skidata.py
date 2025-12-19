@@ -301,10 +301,7 @@ def get_10_website():
     
     url = "https://www.saddlebackmaine.com/mountain-report/#overview"
     driver.get(url)
-    time.sleep(15)
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-    time.sleep(5)
+    time.sleep(10)
     soup = bs(driver.page_source , "lxml")
 
     lifts = soup.select("div#data-open-lifts-value")[0].text
@@ -593,7 +590,6 @@ def get_15_website():
     URL = "https://bousquetmountain.com/lift-trail-status/"
     driver = headless_browser()
     driver.get(URL)
-    time.sleep(5)
     wait = WebDriverWait(driver, 10)
 
     close_btn = wait.until(EC.element_to_be_clickable(
@@ -601,13 +597,11 @@ def get_15_website():
     ))
 
     close_btn.click()
-    time.sleep(3)
+    time.sleep(1)
     soup = bs(driver.page_source, "lxml")
 
     # ---- LIFTS ----
     lift_container = soup.select_one('div[data-id="2056269"]')
-    if lift_container:
-        print("Lift container exists ✔")
     lifts, lifts_open, lifts_total = extract_items(lift_container)
 
     # ---- TRAILS ----
@@ -726,13 +720,11 @@ def get_17_website():
     driver = headless_browser()
 
     try:
-        driver.open(url)
+        driver.get(url)
 
         # Wait for Cloudflare challenge + JS rendering
-        driver.wait_for_element("div.snow-report__stats-grid", timeout=20)
-
-        # SHORT additional wait to ensure values update
-        time.sleep(40)
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.snow-report__stats-grid")))
 
         def tx(css):
             try:
@@ -1312,7 +1304,7 @@ def get_29_website():
     }
     
     response = requests.get('https://www.snocountry.com/widget/widget_resort.php', params=params , headers = headers)
-    tables = pd.read_html(response.text)
+    tables = pd.read_html(StringIO(response.text))
     
     df = tables[0]
     df.columns = df.iloc[1 , :]
@@ -1349,10 +1341,8 @@ def get_29_website():
 # ft
 def get_30_website():
     url = "https://www.kingpine.com/snow-report-conditions"
-    
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
-    browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    browser = headless_browser()
 
     browser.get(url)
     time.sleep(2)   # allow iframe to load
@@ -1360,21 +1350,14 @@ def get_30_website():
     # --- Find the iframe with ID iFrameResizer0 ---
     try:
         iframe = browser.find_element("css selector", "iframe#iframeResizer0, iframe#iFrameResizer0")
-        print("Found iframe:", iframe.get_attribute("id"))
     except Exception:
         print("❌ iframe NOT found")
         browser.quit()
         return
 
-    print("IFRAME SRC:", iframe.get_attribute("src"))
-
     # Switch selenium to the iframe DOM
     browser.switch_to.frame(iframe)
     time.sleep(1)
-
-    # Print iframe page title
-    title = browser.title
-    print("INSIDE IFRAME — TITLE =", title)
 
     # NOW get the dynamic HTML inside iframe
     html = browser.page_source
@@ -1521,7 +1504,7 @@ def get_33_website():
     all_data = soup.select("div.snow-text")
     
     num_trails = soup.select("div.slopes-details")[0].select("div.content")[0].select("h4")[0].text.strip().split(" ")[0]
-    num_lifts = sum([ 1 if status.lower() == "open" else 0 for status in pd.read_html(str(soup.select("div.lift-name")[0]))[0]["Status"].tolist()])
+    num_lifts = sum([ 1 if status.lower() == "open" else 0 for status in pd.read_html(StringIO(str(soup.select("div.lift-name")[0])))[0]["Status"].tolist()])
     
     
     depth = [cond.text.strip(" ''\n\t”") for cond in all_data if "Current Base" in cond.text][0].replace("Current Base" , "").strip(" ''\n\t”").split("-")[0]
@@ -1540,32 +1523,20 @@ def get_34_website():
 
     url = "https://www.waterville.com/snow-report-maps"
 
-    # --- SELENIUM SETUP ---
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
-
-    browser = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
-
+    browser = headless_browser()
     browser.get(url)
     time.sleep(5)
 
     # --- FIND THE IFRAME ---
     try:
         iframe = browser.find_element("css selector", "iframe#iFrameResizer1, iframe#iFrameResizer1")
-        print("Found iframe:", iframe.get_attribute("id"))
     except:
         print("❌ iframe NOT found")
         browser.quit()
         return {}
-
-    print("IFRAME SRC:", iframe.get_attribute("src"))
-
     # --- SWITCH INTO IFRAME ---
     browser.switch_to.frame(iframe)
-    time.sleep(5)
+    time.sleep(1)
 
     html = browser.page_source
     browser.quit()
@@ -1654,7 +1625,7 @@ def get_35_website():
     driver.switch_to.frame(second_iframe)
     time.sleep(2)
 
-    tables = pd.read_html(driver.page_source)
+    tables = pd.read_html(StringIO(driver.page_source))
 
     df = tables[0]
     df = df.fillna("")
@@ -1769,14 +1740,7 @@ def get_38_website():
 
     url = "https://www.boltonvalley.com/winter/trail-maps-snow-reports/snow-reports/"
 
-    # --- SELENIUM SETUP ---
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
-
-    browser = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
+    browser = headless_browser()
 
     browser.get(url)
     time.sleep(2)
@@ -1784,13 +1748,10 @@ def get_38_website():
     # --- FIND THE IFRAME ---
     try:
         iframe = browser.find_element("css selector", "iframe#iframeResizer0, iframe#iFrameResizer0")
-        # print("Found iframe:", iframe.get_attribute("id"))
     except:
         print("❌ iframe NOT found")
         browser.quit()
         return {}
-
-    # print("IFRAME SRC:", iframe.get_attribute("src"))
 
     # --- SWITCH INTO IFRAME ---
     browser.switch_to.frame(iframe)
@@ -1799,10 +1760,6 @@ def get_38_website():
     # --- PARSE HTML ---
     html = browser.page_source
     soup = bs(html, "lxml")
-
-    # -------------------------------
-    #       SCRAPE NEW STRUCTURE
-    # -------------------------------
 
     # ====== SNOW FALL SECTION ======
     snow_section = soup.select_one("section.SnowReport-section.snowfall")
@@ -1859,7 +1816,7 @@ def get_39_website():
     
     try:
         # Extract Trails Open
-        trails_section = soup.find("h5", text="Trails Open")
+        trails_section = soup.find("h5", string="Trails Open")
         trails_text = trails_section.find_next("h1").text.strip()
         num_trails = int(trails_text.split()[0])
     except Exception:
@@ -1867,7 +1824,7 @@ def get_39_website():
     
     try:
         # Extract Lifts Open
-        lifts_section = soup.find("h5", text="Lifts Open")
+        lifts_section = soup.find("h5", string="Lifts Open")
         lifts_text = lifts_section.find_next("h1").text.strip()
         num_lifts = int(lifts_text.split()[0])
     except Exception:
@@ -1875,7 +1832,7 @@ def get_39_website():
 
     try:
         # Extract Base Depth
-        depth_section = soup.find("h5", text="Base Depth")
+        depth_section = soup.find("h5", string="Base Depth")
         depth_text = depth_section.find_next("h1").text.strip()
         depth = int(depth_text.split('"')[0])
     except Exception:
@@ -1883,7 +1840,7 @@ def get_39_website():
     
     try:
         # Extract New Snow
-        new_snow_section = soup.find("h5", text="New Snow")
+        new_snow_section = soup.find("h5", string="New Snow")
         new_snow_text = new_snow_section.find_next("h1").text.strip()
         new_snow = float(new_snow_text.split('"')[0])
     except Exception:
@@ -2160,50 +2117,46 @@ def get_44_website():
 # ft
 def get_45_website():
 
-    "last updated on 16 dec 2023"
-    """MIDDLEBURY SNOW BOWL:  https://www.middleburysnowbowl.com/conditions/"""
-#    
-    url = "https://www.middleburysnowbowl.com/conditions/"
-    r = requests.get(url)
-    soup = bs(r.text , "lxml")
-    
-    try:
-        iframe = soup.select("#post-668 > div > p:nth-child(7) > iframe")[0].get("src")
-    except:
-        iframe = soup.select("#post-668 > div > p > iframe")[0].get("src")
-    
-    r2 = requests.get(iframe)
-    soup2 = bs(r2.text , "lxml")
-    
-    all_lists = [t.text for t in soup2.select("tr")]
-#     print(all_lists)
-    
-    try:
-        num_lifts = int(re.findall("\d+" , [l for l in all_lists if "Lifts open:" in l][0].split("Lifts open:")[1])[0])
-    except:
-        num_lifts = 0
-        
-    try:
-        num_trails = int(re.findall("\d+" , [l for l in all_lists if "Trails open:" in l][0].split("Trails open:")[1])[0])
-    except:
-        num_trails = 0 
-    
-    try:
-        depth = int(re.findall("\d+" , [l for l in all_lists if "Base" in l][0].split("Base")[1])[0])
-    except:
-        depth = 0
-    
-    try:
-        new_snow = int(re.findall("\d+" , [l for l in all_lists if "New Snow:" in l][0].split("New Snow:")[1])[0])
-    except:
-        new_snow = 0
-    
-    data_dict = {"MIDDLEBURY SNOW BOWL" : {"trails" : num_trails ,
-                                          "lifts" : num_lifts,
-                                          "depth" : depth,
-                                            "new snow" : new_snow}}
-    
-    return data_dict
+    url = "https://ski-middlebury.app.alpinemedia.com/embed/lifts-trails/conditions?resort=middlebury-snowbowl"
+    driver = headless_browser()
+    driver.get(url)
+    time.sleep(10)
+    soup2 = bs(driver.page_source , "lxml")
+
+  # matches "6 of 8 trails open", "0 of 12 trails open", etc.
+    TRAIL_REGEX = re.compile(r"(\d+)\s+of\s+(\d+)\s+trails?\s+open", re.I)
+
+    trail_blocks = TRAIL_REGEX.findall(soup2.get_text(" ", strip=True))
+
+    total_open_trails = 0
+    total_possible_trails = 0
+
+    for open_t, total_t in trail_blocks:
+        total_open_trails += int(open_t)
+        total_possible_trails += int(total_t)
+
+    # ----------------------------------
+    # EXTRACT LIFT BLOCKS (similar format)
+    # ----------------------------------
+
+    LIFT_REGEX = re.compile(r"(\d+)\s+of\s+(\d+)\s+lifts?\s+open", re.I)
+
+    lift_blocks = LIFT_REGEX.findall(soup2.get_text(" ", strip=True))
+
+    total_open_lifts = 0
+    total_possible_lifts = 0
+
+    for open_l, total_l in lift_blocks:
+        total_open_lifts += int(open_l)
+        total_possible_lifts += int(total_l)
+
+    return {
+        "MIDDLEBURY SNOW BOWL": {
+            "trails": total_open_trails,
+            "lifts": total_open_lifts,
+        }
+    }
+
 
 
 # ft
@@ -3037,14 +2990,14 @@ def get_final_json_data():
 #         data = { 'BERKSHIRE EAST' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_15_website()
-        print('15 website is done scraping' )
-    except:
-        data = { 'BOUSQUET' : empty_data_dict }
-        None
-    final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_15_website()
+#         print('15 website is done scraping' )
+#     except:
+#         data = { 'BOUSQUET' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # #-----------------------------------
 #     try:
 #         data = get_16_website()
@@ -3053,7 +3006,7 @@ def get_final_json_data():
 #         data = { 'CATAMOUNT' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # #-----------------------------------
+# #-----------------------------------
 #     try:
 #         data = get_17_website()
 #         print('17 website is done scraping' )
@@ -3167,7 +3120,7 @@ def get_final_json_data():
 #         None
 #     final_json.append(data)
 
-# #-----------------------------------
+# # #-----------------------------------
 
 #     try:
 #         data = get_31_website()
@@ -3280,14 +3233,14 @@ def get_final_json_data():
 #         data = { 'MAGIC MOUNTAIN' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # #-----------------------------------
-#     try:
-#         data = get_45_website()
-#         print('45 website is done scraping' )
-#     except:
-#         data = { 'MIDDLEBURY SNOW BOWL' : empty_data_dict }
-#         None
-#     final_json.append(data)
+# #-----------------------------------
+    try:
+        data = get_45_website()
+        print('45 website is done scraping' )
+    except:
+        data = { 'MIDDLEBURY SNOW BOWL' : empty_data_dict }
+        None
+    final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_46_website()
