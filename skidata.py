@@ -1346,7 +1346,7 @@ def get_30_website():
 
     browser.get(url)
     time.sleep(7)   # allow iframe to load
-    
+
     # NOW get the dynamic HTML inside iframe
     html = browser.page_source
     soup = bs(html, "lxml")
@@ -2497,33 +2497,50 @@ def get_55_website():
     return data_dict
 
 def get_56_website():
-    """SKI BRADFORD:  https://skibradford.com/snow-report/"""
-    
+    """SKI BRADFORD: https://skibradford.com/snow-report/"""
+
+    import time
+    import re
+    from bs4 import BeautifulSoup as bs
+
     url = "https://skibradford.com/snow-report/"
     driver = headless_browser()
     driver.get(url)
-    time.sleep(5)
+    time.sleep(8)
+
     soup = bs(driver.page_source, "lxml")
-    
-    try:
-        # Extract Trails count
-        trails_element = soup.find("p", string=lambda text: "Total Trails Open" in text).text
-        num_trails = int(trails_element.split()[-1])  # Get the last number in the string
-        
-        # Extract Lifts count
-        lifts_element = soup.find("p", string=lambda text: "Total Lifts Open" in text).text
-        num_lifts = int(lifts_element.split()[-1])  # Get the last number in the string
+    driver.quit()
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        num_trails, num_lifts = 0, 0
-    
-    # Placeholder for depth and new snow
-    depth = 0.0
-    new_snow = 0.0
+    # -----------------------------
+    # SAFE number extractor
+    # -----------------------------
+    def extract_number_after(label):
+        """
+        Looks for any <p> tag that contains the label text anywhere inside,
+        even with spans or formatting.
+        """
+        p_tags = soup.find_all("p")
+        for p in p_tags:
+            full_text = p.get_text(" ", strip=True)
 
-    # Prepare the data dictionary
-    data_dict = {
+            if label.lower() in full_text.lower():
+                # Extract first number that appears
+                m = re.search(r"\d+", full_text)
+                if m:
+                    return int(m.group())
+        return 0
+
+    # -----------------------------
+    # Extract values
+    # -----------------------------
+    num_trails = extract_number_after("Total Trails Open")
+    num_lifts = extract_number_after("Total Lifts Open")
+
+    # Bradford website does NOT display snow depth or 24h snow
+    depth = 0
+    new_snow = 0
+
+    return {
         "SKI BRADFORD": {
             "trails": num_trails,
             "lifts": num_lifts,
@@ -2531,8 +2548,7 @@ def get_56_website():
             "new snow": new_snow
         }
     }
-    
-    return data_dict
+
 
 def get_57_website():
     """GUNSTOCK:  https://www.gunstock.com/winter/snow-report/"""
@@ -2823,450 +2839,450 @@ def get_final_json_data():
 
 
 
-# -----------------------------------
-    try:
-        data = get_1_website()
-        print('1 website is done scraping' )
-    except:
-        data = { 'MOHAWK MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
-#-----------------------------------
-    try:
-        data = get_2_website()
-        print('2 website is done scraping' )
-    except:
-        data = { 'MOUNT SOUTHINGTON' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    # try:
-    #     data = get_3_website()
-    #     print('3 website is done scraping' )
-    # except:
-    #     data = { 'POWDER RIDGE' : empty_data_dict }
-    #     None
-    # final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_4_website()
-        print('4 website is done scraping' )
-    except:
-        data = { 'SKI SUNDOWN' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    # try:
-    #     data = get_5_website()
-    #     print('5 website is done scraping' )
-    # except:
-    #     data = { 'BIGROCK' : empty_data_dict }
-    #     None
-    # final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_6_website()
-        print('6 website is done scraping' )
-    except:
-        data = { 'BLACK MOUNTAIN ME' : empty_data_dict }
-        None
-    final_json.append(data)
-#-----------------------------------
-    try:
-        data = get_7_website()
-        print('7 website is done scraping' )
-    except:
-        data = { 'CAMDEN SNOW BOWL' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_8_website()
-        print('8 website is done scraping' )
-    except:
-        data = { 'LOST VALLEY' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_9_website()
-        print('9 website is done scraping' )
-    except:
-        data = { 'MOUNT ABRAM' : empty_data_dict }
-        None
-    final_json.append(data)
 # # -----------------------------------
-    try:
-        data = get_10_website()
-        print('10 website is done scraping' )
-    except:
-        data = { 'SADDLEBACK' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_1_website()
+#         print('1 website is done scraping' )
+#     except:
+#         data = { 'MOHAWK MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # #-----------------------------------
-    try:
-        data = get_11_website()
-        print('11 website is done scraping' )
-    except:
-        data = { 'PLEASANT MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_2_website()
+#         print('2 website is done scraping' )
+#     except:
+#         data = { 'MOUNT SOUTHINGTON' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     # try:
+#     #     data = get_3_website()
+#     #     print('3 website is done scraping' )
+#     # except:
+#     #     data = { 'POWDER RIDGE' : empty_data_dict }
+#     #     None
+#     # final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_4_website()
+#         print('4 website is done scraping' )
+#     except:
+#         data = { 'SKI SUNDOWN' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     # try:
+#     #     data = get_5_website()
+#     #     print('5 website is done scraping' )
+#     # except:
+#     #     data = { 'BIGROCK' : empty_data_dict }
+#     #     None
+#     # final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_6_website()
+#         print('6 website is done scraping' )
+#     except:
+#         data = { 'BLACK MOUNTAIN ME' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # #-----------------------------------
-    try:
-        data = get_12_website()
-        print('12 website is done scraping' )
-    except:
-        data = { 'SUGARLOAF' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_7_website()
+#         print('7 website is done scraping' )
+#     except:
+#         data = { 'CAMDEN SNOW BOWL' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_8_website()
+#         print('8 website is done scraping' )
+#     except:
+#         data = { 'LOST VALLEY' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_9_website()
+#         print('9 website is done scraping' )
+#     except:
+#         data = { 'MOUNT ABRAM' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # # -----------------------------------
+#     try:
+#         data = get_10_website()
+#         print('10 website is done scraping' )
+#     except:
+#         data = { 'SADDLEBACK' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_11_website()
+#         print('11 website is done scraping' )
+#     except:
+#         data = { 'PLEASANT MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_12_website()
+#         print('12 website is done scraping' )
+#     except:
+#         data = { 'SUGARLOAF' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_13_website()
+#         print('13 website is done scraping' )
+#     except:
+#         data = { 'SUNDAY RIVER' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_14_website()
+#         print('14 website is done scraping' )
+#     except:
+#         data = { 'BERKSHIRE EAST' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_15_website()
+#         print('15 website is done scraping' )
+#     except:
+#         data = { 'BOUSQUET' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # #-----------------------------------
-    try:
-        data = get_13_website()
-        print('13 website is done scraping' )
-    except:
-        data = { 'SUNDAY RIVER' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_16_website()
+#         print('16 website is done scraping' )
+#     except:
+#         data = { 'CATAMOUNT' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # #-----------------------------------
-    try:
-        data = get_14_website()
-        print('14 website is done scraping' )
-    except:
-        data = { 'BERKSHIRE EAST' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_17_website()
+#         print('17 website is done scraping' )
+#     except:
+#         data = { 'JIMINY PEAK' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_18_website()
+#         print('18 website is done scraping' )
+#     except:
+#         data = { 'NASHOBA VALLEY' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_19_website()
+#         print('19 website is done scraping' )
+#     except:
+#         data = { 'BRADFORD' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_20_website()
+#         print('20 website is done scraping' )
+#     except:
+#         data = { 'BUTTERNUT' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_21_website()
+#         print('21 website is done scraping' )
+#     except:
+#         data = { 'SKI WARD' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_22_website()
+#         print('22 website is done scraping' )
+#     except:
+#         data = { 'WACHUSETT' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_23_website()
+#         print('23 website is done scraping' )
+#     except:
+#         data = { 'ATTITASH' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_24_website()
+#         print('24 website is done scraping' )
+#     except:
+#         data = { 'BRETTON WOODS' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_25_website()
+#         print('25 website is done scraping' )
+#     except:
+#         data = { 'BLACK MOUNTAIN NH' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_26_website()
+#         print('26 website is done scraping' )
+#     except:
+#         data = { 'CANNON MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # #-----------------------------------
-    try:
-        data = get_15_website()
-        print('15 website is done scraping' )
-    except:
-        data = { 'BOUSQUET' : empty_data_dict }
-        None
-    final_json.append(data)
-#-----------------------------------
-    try:
-        data = get_16_website()
-        print('16 website is done scraping' )
-    except:
-        data = { 'CATAMOUNT' : empty_data_dict }
-        None
-    final_json.append(data)
-#-----------------------------------
-    try:
-        data = get_17_website()
-        print('17 website is done scraping' )
-    except:
-        data = { 'JIMINY PEAK' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_18_website()
-        print('18 website is done scraping' )
-    except:
-        data = { 'NASHOBA VALLEY' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_19_website()
-        print('19 website is done scraping' )
-    except:
-        data = { 'BRADFORD' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_20_website()
-        print('20 website is done scraping' )
-    except:
-        data = { 'BUTTERNUT' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_21_website()
-        print('21 website is done scraping' )
-    except:
-        data = { 'SKI WARD' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_22_website()
-        print('22 website is done scraping' )
-    except:
-        data = { 'WACHUSETT' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_23_website()
-        print('23 website is done scraping' )
-    except:
-        data = { 'ATTITASH' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_24_website()
-        print('24 website is done scraping' )
-    except:
-        data = { 'BRETTON WOODS' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_25_website()
-        print('25 website is done scraping' )
-    except:
-        data = { 'BLACK MOUNTAIN NH' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_26_website()
-        print('26 website is done scraping' )
-    except:
-        data = { 'CANNON MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
-#-----------------------------------
-    try:
-        data = get_27_website()
-        print('27 website is done scraping' )
-    except:
-        data = { 'CRANMORE' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_28_website()
-        print('28 website is done scraping' )
-    except:
-        data = { 'CROTCHED' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
+#     try:
+#         data = get_27_website()
+#         print('27 website is done scraping' )
+#     except:
+#         data = { 'CRANMORE' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_28_website()
+#         print('28 website is done scraping' )
+#     except:
+#         data = { 'CROTCHED' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
     
-    try:
-        data = get_29_website()
-        print('29 website is done scraping' )
-    except:
-        data = { 'DARTMOUTH SKIWAY' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_30_website()
-        print('30 website is done scraping' )
-    except:
-        data = { 'KING PINE' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_29_website()
+#         print('29 website is done scraping' )
+#     except:
+#         data = { 'DARTMOUTH SKIWAY' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_30_website()
+#         print('30 website is done scraping' )
+#     except:
+#         data = { 'KING PINE' : empty_data_dict }
+#         None
+#     final_json.append(data)
 
-# #-----------------------------------
+# # #-----------------------------------
 
-    try:
-        data = get_31_website()
-        print('31 website is done scraping' )
-    except:
-        data = { 'MOUNT SUNAPEE' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_31_website()
+#         print('31 website is done scraping' )
+#     except:
+#         data = { 'MOUNT SUNAPEE' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_32_website()
+#         print('32 website is done scraping' )
+#     except:
+#         data = { 'PATS PEAK' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_33_website()
+#         print('33 website is done scraping' )
+#     except:
+#         data = { 'RAGGED MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_34_website()
+#         print('34 website is done scraping' )
+#     except:
+#         data = { 'WATERVILLE VALLEY' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_35_website()
+#         print('35 website is done scraping' )
+#     except:
+#         data = { 'WHALEBACK' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_36_website()
+#         print('36 website is done scraping' )
+#     except:
+#         data = { 'WILDCAT' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_37_website()
+#         print('37 website is done scraping' )
+#     except:
+#         data = { 'YAWGOO VALLEY' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_38_website()
+#         print('38 website is done scraping' )
+#     except:
+#         data = { 'BOLTON VALLEY' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # #-----------------------------------
-    try:
-        data = get_32_website()
-        print('32 website is done scraping' )
-    except:
-        data = { 'PATS PEAK' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_33_website()
-        print('33 website is done scraping' )
-    except:
-        data = { 'RAGGED MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_34_website()
-        print('34 website is done scraping' )
-    except:
-        data = { 'WATERVILLE VALLEY' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_35_website()
-        print('35 website is done scraping' )
-    except:
-        data = { 'WHALEBACK' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_36_website()
-        print('36 website is done scraping' )
-    except:
-        data = { 'WILDCAT' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_37_website()
-        print('37 website is done scraping' )
-    except:
-        data = { 'YAWGOO VALLEY' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_38_website()
-        print('38 website is done scraping' )
-    except:
-        data = { 'BOLTON VALLEY' : empty_data_dict }
-        None
-    final_json.append(data)
-#-----------------------------------
-    try:
-        data = get_39_website()
-        print('39 website is done scraping' )
-    except:
-        data = { 'BROMLEY' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_40_website()
-        print('40 website is done scraping' )
-    except:
-        data = { 'BURKE' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_41_website()
-        print('41 website is done scraping' )
-    except:
-        data = { 'JAY PEAK' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_42_website()
-        print('42 website is done scraping' )
-    except:
-        data = { 'KILLINGTON' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_43_website()
-        print('43 website is done scraping' )
-    except:
-        data = { 'MAD RIVER GLEN' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_44_website()
-        print('44 website is done scraping' )
-    except:
-        data = { 'MAGIC MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_45_website()
-        print('45 website is done scraping' )
-    except:
-        data = { 'MIDDLEBURY SNOW BOWL' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_46_website()
-        print('46 website is done scraping' )
-    except:
-        data = { 'MOUNT SNOW' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_47_website()
-        print('47 website is done scraping' )
-    except:
-        data = { 'OKEMO' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_48_website()
-        print('48 website is done scraping' )
-    except:
-        data = { 'SMUGGLERS NOTCH' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    # try:
-    #     data = get_49_website()
-    #     print('49 website is done scraping' )
-    # except:
-    #     data = { 'STOWE' : empty_data_dict }
-    #     None
-    # final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_50_website()
-        print('50 website is done scraping' )
-    except:
-        data = { 'STRATTON' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_51_website()
-        print('51 website is done scraping' )
-    except:
-        data = { 'SUGARBUSH' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_39_website()
+#         print('39 website is done scraping' )
+#     except:
+#         data = { 'BROMLEY' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_40_website()
+#         print('40 website is done scraping' )
+#     except:
+#         data = { 'BURKE' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_41_website()
+#         print('41 website is done scraping' )
+#     except:
+#         data = { 'JAY PEAK' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_42_website()
+#         print('42 website is done scraping' )
+#     except:
+#         data = { 'KILLINGTON' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_43_website()
+#         print('43 website is done scraping' )
+#     except:
+#         data = { 'MAD RIVER GLEN' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_44_website()
+#         print('44 website is done scraping' )
+#     except:
+#         data = { 'MAGIC MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_45_website()
+#         print('45 website is done scraping' )
+#     except:
+#         data = { 'MIDDLEBURY SNOW BOWL' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_46_website()
+#         print('46 website is done scraping' )
+#     except:
+#         data = { 'MOUNT SNOW' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_47_website()
+#         print('47 website is done scraping' )
+#     except:
+#         data = { 'OKEMO' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_48_website()
+#         print('48 website is done scraping' )
+#     except:
+#         data = { 'SMUGGLERS NOTCH' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     # try:
+#     #     data = get_49_website()
+#     #     print('49 website is done scraping' )
+#     # except:
+#     #     data = { 'STOWE' : empty_data_dict }
+#     #     None
+#     # final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_50_website()
+#         print('50 website is done scraping' )
+#     except:
+#         data = { 'STRATTON' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_51_website()
+#         print('51 website is done scraping' )
+#     except:
+#         data = { 'SUGARBUSH' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # # -----------------------------------
+#     try:
+#         data = get_52_website()
+#         print('52 website is done scraping' )
+#     except:
+#         data = { 'LOON' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # # -----------------------------------
-    try:
-        data = get_52_website()
-        print('52 website is done scraping' )
-    except:
-        data = { 'LOON' : empty_data_dict }
-        None
-    final_json.append(data)
-# -----------------------------------
-    try:
-        data = get_53_website()
-        print('53 website is done scraping' )
-    except:
-        data = { 'BURKE' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_54_website()
-        print('54 website is done scraping' )
-    except:
-        data = { 'BIG MOOSE MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_55_website()
-        print('55 website is done scraping' )
-    except:
-        data = { 'BIG MOOSE MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
+#     try:
+#         data = get_53_website()
+#         print('53 website is done scraping' )
+#     except:
+#         data = { 'BURKE' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_54_website()
+#         print('54 website is done scraping' )
+#     except:
+#         data = { 'BIG MOOSE MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_55_website()
+#         print('55 website is done scraping' )
+#     except:
+#         data = { 'BIG MOOSE MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
     try:
         data = get_56_website()
         print('56 website is done scraping' )
@@ -3274,46 +3290,46 @@ def get_final_json_data():
         data = { 'SKI BRADFORD' : empty_data_dict }
         None
     final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_57_website()
-        print('57 website is done scraping' )
-    except:
-        data = { 'GUNSTOCK' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_58_website()
-        print('58 website is done scraping' )
-    except:
-        data = { 'MCINTYRE' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_59_website()
-        print('59 website is done scraping' )
-    except:
-        data = { 'TENNEY MOUNTAIN' : empty_data_dict }
-        None
-    final_json.append(data)
-# #-----------------------------------
-    try:
-        data = get_60_website()
-        print('60 website is done scraping' )
-    except:
-        data = { 'PICO' : empty_data_dict }
-        None
-    final_json.append(data)
 # # #-----------------------------------
-    try:
-        data = get_61_website()
-        print('61 website is done scraping' )
-    except:
-        data = { 'SASKADENA SIX' : empty_data_dict }
-        None
-    final_json.append(data)
+#     try:
+#         data = get_57_website()
+#         print('57 website is done scraping' )
+#     except:
+#         data = { 'GUNSTOCK' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_58_website()
+#         print('58 website is done scraping' )
+#     except:
+#         data = { 'MCINTYRE' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_59_website()
+#         print('59 website is done scraping' )
+#     except:
+#         data = { 'TENNEY MOUNTAIN' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # #-----------------------------------
+#     try:
+#         data = get_60_website()
+#         print('60 website is done scraping' )
+#     except:
+#         data = { 'PICO' : empty_data_dict }
+#         None
+#     final_json.append(data)
+# # # #-----------------------------------
+#     try:
+#         data = get_61_website()
+#         print('61 website is done scraping' )
+#     except:
+#         data = { 'SASKADENA SIX' : empty_data_dict }
+#         None
+#     final_json.append(data)
 #-----------------------------------
     # if new_source == True:
     #     print('52 website is done scraping' )
