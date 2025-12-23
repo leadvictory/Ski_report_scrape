@@ -2750,53 +2750,54 @@ def get_60_website():
 
     driver = headless_browser()
 
+    # Safe defaults (prevents UnboundLocalError)
+    lifts = 0
+    trails = 0
+    base_depth = ""
+    new_snow = 0
+
     try:
-        # Load the page
         url = "https://www.picomountain.com/the-mountain/conditions-weather/current-conditions-weather"
         driver.get(url)
-        time.sleep(5)  # Wait for content to load
+        time.sleep(10)
 
-        # Find all measurement items
-        measurement_items = driver.find_elements(By.CSS_SELECTOR, "div.styles__StyledDorMeasurementItem-sc-efp7vw-0")
+        # ---- Extract Lifts & Trails ----
+        items = driver.find_elements(By.CSS_SELECTOR, "div.styles__StyledDorMeasurementItem-sc-efp7vw-0")
 
-        # Initialize variables
-        num_trails = 0
-        num_lifts = 0
+        lifts_raw = items[3].find_element(By.CLASS_NAME, "percent-primary-text").text.strip()
+        trails_raw = items[4].find_element(By.CLASS_NAME, "percent-primary-text").text.strip()
 
-        # Loop through the measurement items and find the correct labels
-        num_lifts = measurement_items[2].find_element(By.CLASS_NAME, "percent-primary-text").text.strip()
-        num_trails = measurement_items[3].find_element(By.CLASS_NAME, "percent-primary-text").text.strip()
+        lifts = int(lifts_raw)
+        trails = int(trails_raw)
 
-        # Extract Base Depth and New Snow (48 Hour) from the <ul>
-        base_depth, new_snow = 0, 0
+        # ---- Extract Base Depth & New Snow ----
         report_items = driver.find_elements(By.CSS_SELECTOR, "ul.styles__ReportDataItems-sc-1kqptpn-8 li")
-        for item in report_items:
-            header = item.find_element(By.CLASS_NAME, "styles__ItemHeader-sc-1kqptpn-10").text.strip()
-            value = item.find_element(By.CLASS_NAME, "styles__ItemValue-sc-1kqptpn-12").text.strip()
+
+        for li in report_items:
+            header = li.find_element(By.CLASS_NAME, "styles__ItemHeader-sc-1kqptpn-10").text.strip()
+            value = li.find_element(By.CLASS_NAME, "styles__ItemValue-sc-1kqptpn-12").text.strip()
+
+            value_clean = value.replace('"', "").strip()  # Remove inch mark
 
             if header == "Base-Depth":
-                base_depth = int(value.replace('"', "").strip())  # Remove double quotes
+                base_depth = value_clean              # KEEP AS STRING: "24 - 48"
             elif header == "48 Hour":
-                new_snow = int(value.replace('"', "").strip())  # Remove double quotes
+                new_snow = int(value_clean) if value_clean.isdigit() else 0
 
     except Exception as e:
-        print(f"Error occurred: {e}")
-        num_trails, num_lifts, base_depth, new_snow = 0, 0, 0, 0
+        print("Error occurred:", e)
 
     finally:
-        # Quit the driver
         driver.quit()
 
-    # Prepare the result
-    data_dict = {
+    return {
         "PICO": {
-            "trails": num_trails,
-            "lifts": num_lifts,
+            "trails": trails,
+            "lifts": lifts,
             "base depth": base_depth,
             "new snow": new_snow
         }
     }
-    return data_dict
 
 def get_61_website():
     """SASKADENA SIX: Extract number of open lifts and trails."""
@@ -2997,14 +2998,14 @@ def get_final_json_data():
 #         data = { 'CATAMOUNT' : empty_data_dict }
 #         None
 #     final_json.append(data)
-#-----------------------------------
-    try:
-        data = get_17_website()
-        print('17 website is done scraping' )
-    except:
-        data = { 'JIMINY PEAK' : empty_data_dict }
-        None
-    final_json.append(data)
+# #-----------------------------------
+#     try:
+#         data = get_17_website()
+#         print('17 website is done scraping' )
+#     except:
+#         data = { 'JIMINY PEAK' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_18_website()
@@ -3345,13 +3346,13 @@ def get_final_json_data():
 #         None
 #     final_json.append(data)
 # # #-----------------------------------
-#     try:
-#         data = get_60_website()
-#         print('60 website is done scraping' )
-#     except:
-#         data = { 'PICO' : empty_data_dict }
-#         None
-#     final_json.append(data)
+    try:
+        data = get_60_website()
+        print('60 website is done scraping' )
+    except:
+        data = { 'PICO' : empty_data_dict }
+        None
+    final_json.append(data)
 # # # #-----------------------------------
 #     try:
 #         data = get_61_website()
