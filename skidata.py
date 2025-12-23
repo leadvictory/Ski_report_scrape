@@ -357,12 +357,12 @@ def get_11_website():
             trails = int(element.select_one("span.h2").text.strip())
     
     # Construct the data dictionary
-    data_dict = [{
+    data_dict = {
         "PLEASANT MOUNTAIN": {
             "lifts": lifts,
             "trails": trails,
         }
-    }]
+    }
     return data_dict
 
 
