@@ -2330,11 +2330,21 @@ def get_52_website():
         # Extract the first number (open trails)
         trails_num = int(trail_text.split(" ")[0])
 
+        snow_24 = driver.find_element(
+            By.XPATH, "//p[text()='Snow 24 Hrs.']/following-sibling::span/span"
+        ).text.strip()
+
+        base_depth = driver.find_element(
+            By.XPATH, "//p[text()='Base Depth']/following-sibling::span/span"
+        ).text.strip()  # example: "24 - 48"
+
         data_dict = {
             "LOON": {
                 "lifts": lifts_num,
                 "trails": trails_num,
-                "new snow": new_snow
+                "new snow": snow_24.replace('"', ""),
+                "base depth": base_depth.replace('"', "")
+
             }
         }
 
