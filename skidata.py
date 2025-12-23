@@ -1452,7 +1452,7 @@ def get_32_website():
         new_snow = int(re.findall(r"\d+", new_snow_str)[0])
     except:
         new_snow = None
-
+    driver.quit()
     data_dict = {
         "PATS PEAK": {
             "trails": num_trails,
@@ -2307,7 +2307,6 @@ def get_52_website():
     """LOON https://www.loonmtn.com/mountain-report"""
 
     url = "https://www.loonmtn.com/mountain-report"
-
     driver = headless_browser()
 
     try:
@@ -2316,11 +2315,20 @@ def get_52_website():
 
         lifts_num = 0
         trails_num = 0
-        new_snow = 0 
+        new_snow = 0
 
+        # ---- LIFTS (your original logic) ----
         elements = driver.find_elements(By.CSS_SELECTOR, "div.relative.flex.h-44.w-44")
         lifts_num = int(elements[0].find_element(By.CSS_SELECTOR, "span.h2").text.strip())
-        trails_num = int(elements[1].find_element(By.CSS_SELECTOR, "span.h2").text.strip())
+
+        # ---- UPDATED TRAILS EXTRACTION ----
+        trail_span = driver.find_element(
+            By.CSS_SELECTOR, "span.text-brwf-bodysm-md.font-bold"
+        )
+        trail_text = trail_span.text.strip()   # e.g. "38 of 73 Trails Open"
+
+        # Extract the first number (open trails)
+        trails_num = int(trail_text.split(" ")[0])
 
         data_dict = {
             "LOON": {
@@ -2329,14 +2337,16 @@ def get_52_website():
                 "new snow": new_snow
             }
         }
-        
+
         return data_dict
-    
+
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+
     finally:
         driver.quit()
+
 
 def get_53_website():
 
@@ -3250,14 +3260,14 @@ def get_final_json_data():
 #         data = { 'SUGARBUSH' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # # -----------------------------------
-#     try:
-#         data = get_52_website()
-#         print('52 website is done scraping' )
-#     except:
-#         data = { 'LOON' : empty_data_dict }
-#         None
-#     final_json.append(data)
+# # -----------------------------------
+    try:
+        data = get_52_website()
+        print('52 website is done scraping' )
+    except:
+        data = { 'LOON' : empty_data_dict }
+        None
+    final_json.append(data)
 # # -----------------------------------
 #     try:
 #         data = get_53_website()
@@ -3282,14 +3292,14 @@ def get_final_json_data():
 #         data = { 'BIG MOOSE MOUNTAIN' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # #-----------------------------------
-    try:
-        data = get_56_website()
-        print('56 website is done scraping' )
-    except:
-        data = { 'SKI BRADFORD' : empty_data_dict }
-        None
-    final_json.append(data)
+# # # #-----------------------------------
+#     try:
+#         data = get_56_website()
+#         print('56 website is done scraping' )
+#     except:
+#         data = { 'SKI BRADFORD' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_57_website()
