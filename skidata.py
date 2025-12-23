@@ -715,14 +715,27 @@ def safe_int(val):
 def get_17_website():
 
     url = "https://www.jiminypeak.com/The-Mountain/Mountain-Information/Snow-Report/"
-
-    # Launch real Chrome to bypass Cloudflare fully
     driver = headless_browser()
+
+    def clean_snow_value(text):
+        if not text:
+            return ""
+        cleaned = (
+            text.replace("–", "")
+                .replace("—", "")
+                .replace("“", "")
+                .replace("”", "")
+                .replace('"', "")
+                .replace("\u2013", "")
+                .strip()
+        )
+        if cleaned.isdigit():
+            return int(cleaned)
+        return cleaned
 
     try:
         driver.get(url)
 
-        # Wait for Cloudflare challenge + JS rendering
         wait = WebDriverWait(driver, 10)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.snow-report__stats-grid")))
 
@@ -732,21 +745,17 @@ def get_17_website():
             except:
                 return ""
 
-        depth = tx('[data-stat="depth"]')
-        snowfall = tx('[data-stat="snowfall"]')
+        depth_raw = tx('[data-stat="depth"]')
+        snowfall_raw = tx('[data-stat="snowfall"]')
         lifts_day = tx('[data-stat="lifts-day"]')
-        lifts_night = tx('[data-stat="lifts-night"]')
         trails_day = tx('[data-stat="trails-day"]')
-        trails_night = tx('[data-stat="trails-night"]')
 
         data = {
             "JIMINY PEAK": {
-                "depth": depth,                     
-                "snowfall_24h": snowfall,
-                "lifts_open_day": safe_int(lifts_day),
-                "lifts_open_night": safe_int(lifts_night),
-                "trails_open_day": safe_int(trails_day),
-                "trails_open_night": safe_int(trails_night),
+                "lifts": safe_int(lifts_day),
+                "trails": safe_int(trails_day),
+                "depth": clean_snow_value(depth_raw),
+                "new snow": clean_snow_value(snowfall_raw),
             }
         }
 
@@ -754,6 +763,7 @@ def get_17_website():
 
     finally:
         driver.quit()
+
 
 
 def get_18_website():
@@ -2987,14 +2997,14 @@ def get_final_json_data():
 #         data = { 'CATAMOUNT' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# #-----------------------------------
-#     try:
-#         data = get_17_website()
-#         print('17 website is done scraping' )
-#     except:
-#         data = { 'JIMINY PEAK' : empty_data_dict }
-#         None
-#     final_json.append(data)
+#-----------------------------------
+    try:
+        data = get_17_website()
+        print('17 website is done scraping' )
+    except:
+        data = { 'JIMINY PEAK' : empty_data_dict }
+        None
+    final_json.append(data)
 # # #-----------------------------------
 #     try:
 #         data = get_18_website()
@@ -3270,14 +3280,14 @@ def get_final_json_data():
 #         data = { 'SUGARBUSH' : empty_data_dict }
 #         None
 #     final_json.append(data)
-# # -----------------------------------
-    try:
-        data = get_52_website()
-        print('52 website is done scraping' )
-    except:
-        data = { 'LOON' : empty_data_dict }
-        None
-    final_json.append(data)
+# # # -----------------------------------
+#     try:
+#         data = get_52_website()
+#         print('52 website is done scraping' )
+#     except:
+#         data = { 'LOON' : empty_data_dict }
+#         None
+#     final_json.append(data)
 # # -----------------------------------
 #     try:
 #         data = get_53_website()
